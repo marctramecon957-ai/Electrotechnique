@@ -8,12 +8,12 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="danger-strip"></div>
+<div class="top-rule"></div>
 <header class="site-header">
   <div class="header-inner">
     <a href="index.html" class="brand">
       <img src="img/logo.png" alt="Logo">
-      <span class="brand-text">Électro<strong>technique</strong></span>
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
     </a>
     <nav class="main-nav">
       <a href="index.html">Accueil</a>
@@ -25,9 +25,9 @@
     </nav>
     <div class="header-actions">
       <div class="theme-switch">
-        <button data-mode="clair" title="Thème clair">☀️</button>
-        <button data-mode="sombre" title="Thème sombre">🌙</button>
-        <button data-mode="systeme" title="Suivre le système">🖥️</button>
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
       </div>
     </div>
   </div>
@@ -79,11 +79,22 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top:22px;">
-      <span class="tag jaune">Astuce</span>
-      <h3>Vous connaissez une autre norme utile ?</h3>
-      <p>L'équipe pédagogique peut ajouter de nouvelles fiches de normes depuis l'espace admin (onglet « Publications »). Consultez la page <a href="publications.html">Publications</a> pour les retrouver.</p>
+    <div class="card" style="margin-top:0;">
+      <span class="tag jaune">À savoir</span>
+      <h3>Où trouver les documents complets ?</h3>
+      <p>Les normes officielles (NFC 15-100, EN 60204-1…) sont des documents payants protégés
+      par le droit d'auteur (AFNOR / CEI) : ce site ne peut pas héberger leur texte intégral.
+      L'équipe pédagogique publie ci-dessous des liens vers des supports internes ou vers les
+      sources officielles pour consultation/achat.</p>
     </div>
+
+    <div class="section-head" style="margin-top:48px;">
+      <div>
+        <div class="ref-label">DOCUMENTS</div>
+        <h2>Documents liés</h2>
+      </div>
+    </div>
+    <div id="docs-wrap" class="grid grid-2"></div>
   </div>
 </section>
 
@@ -109,5 +120,28 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script>
+function renderDocs(){
+  const docs = getDB(DB_KEYS.documents).slice().reverse();
+  const wrap = document.getElementById("docs-wrap");
+  if(docs.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Aucun document publié pour le moment.</p>';
+    return;
+  }
+  wrap.innerHTML = docs.map(d=>`
+    <div class="card">
+      <span class="tag ${d.type==='officiel' ? 'rouge' : ''}">${d.type==='officiel' ? 'Source officielle' : 'Support interne'}${d.norme ? ' · '+escapeHtml(d.norme) : ''}</span>
+      <h3>${escapeHtml(d.title)}</h3>
+      <a href="${d.url}" target="_blank" rel="noopener" class="btn btn-bleu btn-sm">Ouvrir le document</a>
+    </div>
+  `).join("");
+}
+function escapeHtml(str){
+  const el = document.createElement("div");
+  el.textContent = str || "";
+  return el.innerHTML;
+}
+document.addEventListener("DOMContentLoaded", renderDocs);
+</script>
 </body>
 </html>

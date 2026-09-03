@@ -8,12 +8,12 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="danger-strip"></div>
+<div class="top-rule"></div>
 <header class="site-header">
   <div class="header-inner">
     <a href="index.html" class="brand">
       <img src="img/logo.png" alt="Logo">
-      <span class="brand-text">Électro<strong>technique</strong></span>
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
     </a>
     <nav class="main-nav">
       <a href="index.html">Accueil</a>
@@ -25,9 +25,9 @@
     </nav>
     <div class="header-actions">
       <div class="theme-switch">
-        <button data-mode="clair" title="Thème clair">☀️</button>
-        <button data-mode="sombre" title="Thème sombre">🌙</button>
-        <button data-mode="systeme" title="Suivre le système">🖥️</button>
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
       </div>
     </div>
   </div>
@@ -45,7 +45,7 @@
       <label style="font-size:.82rem;font-weight:700;">Mot de passe local</label>
       <input id="setup-pass" type="password" placeholder="Choisissez un mot de passe">
       <button class="btn btn-jaune" style="width:100%;" id="setup-btn">Créer mon accès propriétaire</button>
-      <p style="font-size:.72rem;color:var(--gris-2);margin-top:12px;">⚠️ Ce site est statique : ces identifiants sont stockés uniquement dans le navigateur (localStorage), pas sur un serveur. Pour une vraie sécurité, ajoutez un backend (voir README).</p>
+      <p style="font-size:.72rem;color:var(--gris-2);margin-top:12px;">Important — ce site est statique : ces identifiants sont stockés uniquement dans le navigateur (localStorage), pas sur un serveur. Pour une vraie sécurité, ajoutez un backend (voir README).</p>
     </div>
 
     <!-- ---- Connexion ---- -->
@@ -73,6 +73,7 @@
       <div class="admin-tabs">
         <button class="admin-tab-btn active" data-tab="sondages">Sondages</button>
         <button class="admin-tab-btn" data-tab="postes">Publications / Normes</button>
+        <button class="admin-tab-btn" data-tab="documents">Documents</button>
         <button class="admin-tab-btn" data-tab="acces" id="tab-acces-btn">Accès</button>
       </div>
 
@@ -116,6 +117,47 @@
         </div>
         <h3>Publications existantes</h3>
         <div id="admin-posts-list"></div>
+      </div>
+
+      <!-- Onglet Documents -->
+      <div class="admin-panel" id="panel-documents">
+        <div class="card" style="margin-bottom:24px;">
+          <h3>Ajouter un document</h3>
+          <p style="color:var(--text-soft);font-size:.88rem;">
+            Les normes officielles (NFC 15-100, EN 60204-1…) sont des documents payants,
+            protégés par le droit d'auteur (AFNOR / CEI) : impossible de les héberger ou de
+            les diffuser en PDF complet sur ce site. Ajoutez ici soit un <strong>lien vers vos
+            propres supports</strong> (extraits ou fiches que vous avez le droit de diffuser,
+            hébergés par exemple dans un dossier <code>/docs</code> du dépôt GitHub), soit un
+            <strong>lien vers la source officielle</strong> (boutique AFNOR, portail CEI, INRS…).
+          </p>
+          <div class="field-row">
+            <div>
+              <label style="font-size:.82rem;font-weight:700;">Titre du document</label>
+              <input id="doc-title" type="text" placeholder="Ex. Fiche de synthèse NFC 15-100" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+            </div>
+            <div>
+              <label style="font-size:.82rem;font-weight:700;">Norme concernée</label>
+              <input id="doc-norme" type="text" placeholder="Ex. NFC 15-100" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:12px;">
+            <div>
+              <label style="font-size:.82rem;font-weight:700;">Lien (URL du PDF ou de la page)</label>
+              <input id="doc-url" type="url" placeholder="https://..." style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+            </div>
+            <div>
+              <label style="font-size:.82rem;font-weight:700;">Type</label>
+              <select id="doc-type" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+                <option value="interne">Support interne (droits vérifiés)</option>
+                <option value="officiel">Source officielle (achat / consultation)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-jaune" id="create-doc-btn" style="margin-top:14px;">Ajouter le document</button>
+        </div>
+        <h3>Documents disponibles</h3>
+        <div id="admin-docs-list"></div>
       </div>
 
       <!-- Onglet Accès (propriétaire uniquement) -->

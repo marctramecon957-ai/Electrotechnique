@@ -11,6 +11,7 @@ const DB_KEYS = {
   session: "el_session",
   posts: "el_posts",
   polls: "el_polls",
+  documents: "el_documents",
 };
 
 /* ---------- Thème ---------- */
@@ -71,6 +72,7 @@ function initDefaults(){
   if(!localStorage.getItem(DB_KEYS.posts)) localStorage.setItem(DB_KEYS.posts, "[]");
   if(!localStorage.getItem(DB_KEYS.polls)) localStorage.setItem(DB_KEYS.polls, "[]");
   if(!localStorage.getItem(DB_KEYS.notes)) localStorage.setItem(DB_KEYS.notes, "[]");
+  if(!localStorage.getItem(DB_KEYS.documents)) localStorage.setItem(DB_KEYS.documents, "[]");
 }
 
 function getDB(key){ return JSON.parse(localStorage.getItem(key) || "[]"); }

@@ -29,13 +29,14 @@ function renderGate(){
   if(session){
     document.getElementById("admin-panel").classList.remove("hidden");
     document.getElementById("admin-user-label").textContent =
-      (session.isOwner ? "👑 " : "👤 ") + session.email;
+      (session.isOwner ? "[PROPRIÉTAIRE] " : "[INVITÉ] ") + session.email;
     document.getElementById("tab-acces-btn").style.display = session.isOwner ? "" : "none";
     if(!session.isOwner){
       document.querySelectorAll('[data-tab="acces"]').forEach(b=>b.style.display="none");
     }
     renderPollsAdmin();
     renderPostsAdmin();
+    renderDocsAdmin();
     renderAccessTable();
     return;
   }
@@ -243,6 +244,48 @@ function renderPostsAdmin(){
   });
 }
 
+/* ---------- Documents ---------- */
+function initDocForm(){
+  document.getElementById("create-doc-btn").addEventListener("click", ()=>{
+    const title = document.getElementById("doc-title").value.trim();
+    const norme = document.getElementById("doc-norme").value.trim();
+    const url = document.getElementById("doc-url").value.trim();
+    const type = document.getElementById("doc-type").value;
+    if(!title || !url){ toast("Titre et lien requis"); return; }
+    const docs = getDB(DB_KEYS.documents);
+    docs.push({id: uid(), title, norme, url, type, date: Date.now()});
+    setDB(DB_KEYS.documents, docs);
+    document.getElementById("doc-title").value = "";
+    document.getElementById("doc-norme").value = "";
+    document.getElementById("doc-url").value = "";
+    renderDocsAdmin();
+    toast("Document ajouté");
+  });
+}
+function renderDocsAdmin(){
+  const docs = getDB(DB_KEYS.documents).slice().reverse();
+  const wrap = document.getElementById("admin-docs-list");
+  if(docs.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Aucun document ajouté.</p>';
+    return;
+  }
+  wrap.innerHTML = docs.map(d=>`
+    <div class="card" style="margin-bottom:14px;">
+      <span class="tag ${d.type==='officiel' ? 'rouge' : ''}">${d.type==='officiel' ? 'Source officielle' : 'Support interne'}${d.norme ? ' · '+d.norme : ''}</span>
+      <h3>${d.title}</h3>
+      <p style="word-break:break-all;">${d.url}</p>
+      <button class="btn btn-rouge btn-sm delete-doc" data-id="${d.id}">Supprimer</button>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".delete-doc").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      setDB(DB_KEYS.documents, getDB(DB_KEYS.documents).filter(d=>d.id !== btn.dataset.id));
+      renderDocsAdmin();
+      toast("Document supprimé");
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", ()=>{
   initSetup();
   initLogin();
@@ -250,5 +293,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initAccessForm();
   initPollForm();
   initPostForm();
+  initDocForm();
   renderGate();
 });
