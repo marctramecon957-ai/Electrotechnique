@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Normes — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="danger-strip"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Électro<strong>technique</strong></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Accueil</a>
+      <a href="normes.html">Normes</a>
+      <a href="pense-bete.html">Pense-bête</a>
+      <a href="sondages.html">Sondages</a>
+      <a href="publications.html">Publications</a>
+      <a href="admin.html">Espace admin</a>
+    </nav>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">☀️</button>
+        <button data-mode="sombre" title="Thème sombre">🌙</button>
+        <button data-mode="systeme" title="Suivre le système">🖥️</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="section-tag">RÉFÉRENTIEL</div>
+      <h2>Normes électriques de référence</h2>
+      <p>Synthèses pédagogiques des deux normes centrales de la filière. Ces fiches sont des résumés de travail, à compléter par la documentation officielle.</p>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card norme-card">
+        <h3>NFC 15-100</h3>
+        <div class="norme-meta">
+          <span>Installations basse tension</span>
+          <span>France</span>
+          <span>Habitat &amp; tertiaire</span>
+        </div>
+        <p>Norme française régissant la conception, la réalisation et la vérification des installations électriques basse tension (jusqu'à 1000 V en courant alternatif).</p>
+        <p><strong>Points clés à retenir :</strong></p>
+        <ul style="color:var(--text-soft);font-size:.9rem;">
+          <li>Sectionnement et protection de chaque circuit (disjoncteurs, différentiels 30 mA)</li>
+          <li>Règles de dimensionnement des sections de câbles selon la puissance</li>
+          <li>Volumes de sécurité dans les salles d'eau (0, 1, 2)</li>
+          <li>Nombre minimal de prises et de points lumineux par pièce</li>
+          <li>Liaison équipotentielle et mise à la terre obligatoires</li>
+        </ul>
+      </div>
+
+      <div class="card norme-card bleu">
+        <h3>EN 60204-1</h3>
+        <div class="norme-meta">
+          <span>Sécurité des machines</span>
+          <span>Européen / CEI</span>
+          <span>Équipement électrique</span>
+        </div>
+        <p>Norme européenne relative à l'équipement électrique des machines industrielles : elle fixe les exigences de sécurité pour concevoir une armoire électrique.</p>
+        <p><strong>Points clés à retenir :</strong></p>
+        <ul style="color:var(--text-soft);font-size:.9rem;">
+          <li>Fonction d'arrêt d'urgence et catégories d'arrêt (0, 1, 2)</li>
+          <li>Repérage et couleurs des conducteurs (protection, neutre, phases)</li>
+          <li>Degré de protection des armoires (indice IP)</li>
+          <li>Sectionneur général et dispositif de coupure d'urgence</li>
+          <li>Schémas électriques et documentation technique obligatoires</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:22px;">
+      <span class="tag jaune">Astuce</span>
+      <h3>Vous connaissez une autre norme utile ?</h3>
+      <p>L'équipe pédagogique peut ajouter de nouvelles fiches de normes depuis l'espace admin (onglet « Publications »). Consultez la page <a href="publications.html">Publications</a> pour les retrouver.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-col">
+      <h4>Électrotechnique</h4>
+      <p style="color:#b8b8b8;font-size:.85rem;max-width:220px;">Lycées Albert Londres — section électrotechnique.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Navigation</h4>
+      <a href="normes.html">Normes</a><br>
+      <a href="pense-bete.html">Pense-bête</a><br>
+      <a href="sondages.html">Sondages</a>
+    </div>
+    <div class="foot-col">
+      <h4>Liens utiles</h4>
+      <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener">ENT / Pronote</a><br>
+      <a href="admin.html">Espace admin</a>
+    </div>
+  </div>
+  <div class="foot-bottom">Site pédagogique non officiel de la filière électrotechnique.</div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

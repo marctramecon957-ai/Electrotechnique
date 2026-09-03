@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace admin — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="danger-strip"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Électro<strong>technique</strong></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Accueil</a>
+      <a href="normes.html">Normes</a>
+      <a href="pense-bete.html">Pense-bête</a>
+      <a href="sondages.html">Sondages</a>
+      <a href="publications.html">Publications</a>
+      <a href="admin.html" class="active">Espace admin</a>
+    </nav>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">☀️</button>
+        <button data-mode="sombre" title="Thème sombre">🌙</button>
+        <button data-mode="systeme" title="Suivre le système">🖥️</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="admin-shell">
+  <div class="container">
+
+    <!-- ---- Configuration initiale (première visite) ---- -->
+    <div id="setup-box" class="login-box hidden">
+      <h2>Configuration initiale</h2>
+      <p style="color:var(--text-soft);font-size:.88rem;">Aucun compte propriétaire n'existe encore. Créez-le pour administrer le site sur cet appareil.</p>
+      <label style="font-size:.82rem;font-weight:700;">Votre e-mail</label>
+      <input id="setup-email" type="email" placeholder="prenom.nom@ac-xxxx.fr">
+      <label style="font-size:.82rem;font-weight:700;">Mot de passe local</label>
+      <input id="setup-pass" type="password" placeholder="Choisissez un mot de passe">
+      <button class="btn btn-jaune" style="width:100%;" id="setup-btn">Créer mon accès propriétaire</button>
+      <p style="font-size:.72rem;color:var(--gris-2);margin-top:12px;">⚠️ Ce site est statique : ces identifiants sont stockés uniquement dans le navigateur (localStorage), pas sur un serveur. Pour une vraie sécurité, ajoutez un backend (voir README).</p>
+    </div>
+
+    <!-- ---- Connexion ---- -->
+    <div id="login-box" class="login-box hidden">
+      <h2>Connexion admin</h2>
+      <p style="color:var(--text-soft);font-size:.88rem;">Réservé au propriétaire et aux e-mails autorisés.</p>
+      <label style="font-size:.82rem;font-weight:700;">E-mail</label>
+      <input id="login-email" type="email" placeholder="votre@email.fr">
+      <label style="font-size:.82rem;font-weight:700;" id="login-pass-label">Mot de passe (propriétaire uniquement)</label>
+      <input id="login-pass" type="password" placeholder="Laisser vide si vous êtes un invité">
+      <button class="btn btn-bleu" style="width:100%;" id="login-btn">Se connecter</button>
+      <p id="login-error" style="color:var(--rouge);font-size:.82rem;margin-top:10px;"></p>
+    </div>
+
+    <!-- ---- Panneau admin ---- -->
+    <div id="admin-panel" class="hidden">
+      <div class="admin-topbar">
+        <div>
+          <strong id="admin-user-label"></strong>
+          <div style="font-size:.78rem;color:var(--text-soft);">Espace admin — Électrotechnique</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">Déconnexion</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" data-tab="sondages">Sondages</button>
+        <button class="admin-tab-btn" data-tab="postes">Publications / Normes</button>
+        <button class="admin-tab-btn" data-tab="acces" id="tab-acces-btn">Accès</button>
+      </div>
+
+      <!-- Onglet Sondages -->
+      <div class="admin-panel active" id="panel-sondages">
+        <div class="card" style="margin-bottom:24px;">
+          <h3>Créer un sondage</h3>
+          <label style="font-size:.82rem;font-weight:700;">Question</label>
+          <input id="poll-question" type="text" placeholder="Ex. Quel logiciel préférez-vous pour les schémas ?" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin-bottom:10px;">
+          <label style="font-size:.82rem;font-weight:700;">Options de réponse</label>
+          <div id="poll-options"></div>
+          <button class="btn btn-ghost btn-sm" id="add-option-btn" type="button" style="margin:8px 0;">+ Ajouter une option</button><br>
+          <button class="btn btn-jaune" id="create-poll-btn">Publier le sondage</button>
+        </div>
+        <h3>Sondages publiés</h3>
+        <div id="admin-polls-list"></div>
+      </div>
+
+      <!-- Onglet Postes / Publications -->
+      <div class="admin-panel" id="panel-postes">
+        <div class="card" style="margin-bottom:24px;">
+          <h3>Créer une publication (poste, nouvelle norme, info...)</h3>
+          <div class="field-row">
+            <div>
+              <label style="font-size:.82rem;font-weight:700;">Titre</label>
+              <input id="post-title" type="text" placeholder="Ex. Nouvelle norme au programme" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            </div>
+            <div>
+              <label style="font-size:.82rem;font-weight:700;">Catégorie</label>
+              <select id="post-cat" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+                <option>Info</option>
+                <option>Norme</option>
+                <option>TP</option>
+                <option>Événement</option>
+              </select>
+            </div>
+          </div>
+          <label style="font-size:.82rem;font-weight:700;display:block;margin-top:10px;">Contenu</label>
+          <textarea id="post-content" style="width:100%;min-height:100px;padding:9px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);"></textarea>
+          <button class="btn btn-jaune" id="create-post-btn" style="margin-top:12px;">Publier</button>
+        </div>
+        <h3>Publications existantes</h3>
+        <div id="admin-posts-list"></div>
+      </div>
+
+      <!-- Onglet Accès (propriétaire uniquement) -->
+      <div class="admin-panel" id="panel-acces">
+        <div class="card">
+          <h3>E-mails autorisés</h3>
+          <p style="color:var(--text-soft);font-size:.88rem;">Ajoutez les adresses e-mail qui pourront se connecter à cet espace admin sans mot de passe (accès simple par liste blanche, stocké sur cet appareil).</p>
+          <div style="display:flex;gap:8px;margin:14px 0;">
+            <input id="new-access-email" type="email" placeholder="collegue@ac-xxxx.fr" style="flex:1;padding:9px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            <button class="btn btn-bleu" id="add-access-btn">Ajouter</button>
+          </div>
+          <table class="admin-table">
+            <thead><tr><th>E-mail</th><th>Statut</th><th></th></tr></thead>
+            <tbody id="access-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-col">
+      <h4>Électrotechnique</h4>
+      <p style="color:#b8b8b8;font-size:.85rem;max-width:220px;">Lycées Albert Londres — section électrotechnique.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Navigation</h4>
+      <a href="normes.html">Normes</a><br>
+      <a href="pense-bete.html">Pense-bête</a><br>
+      <a href="sondages.html">Sondages</a>
+    </div>
+    <div class="foot-col">
+      <h4>Liens utiles</h4>
+      <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener">ENT / Pronote</a><br>
+      <a href="admin.html">Espace admin</a>
+    </div>
+  </div>
+  <div class="foot-bottom">Site pédagogique non officiel de la filière électrotechnique.</div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

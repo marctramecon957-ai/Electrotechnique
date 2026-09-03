@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sondages — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="danger-strip"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Électro<strong>technique</strong></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Accueil</a>
+      <a href="normes.html">Normes</a>
+      <a href="pense-bete.html">Pense-bête</a>
+      <a href="sondages.html">Sondages</a>
+      <a href="publications.html">Publications</a>
+      <a href="admin.html">Espace admin</a>
+    </nav>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">☀️</button>
+        <button data-mode="sombre" title="Thème sombre">🌙</button>
+        <button data-mode="systeme" title="Suivre le système">🖥️</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="section-tag">PARTICIPATION</div>
+      <h2>Sondages en cours</h2>
+      <p>Créés par l'équipe pédagogique depuis l'espace admin. Un vote par appareil.</p>
+    </div>
+    <div id="polls-wrap" class="grid grid-2"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-col">
+      <h4>Électrotechnique</h4>
+      <p style="color:#b8b8b8;font-size:.85rem;max-width:220px;">Lycées Albert Londres — section électrotechnique.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Navigation</h4>
+      <a href="normes.html">Normes</a><br>
+      <a href="pense-bete.html">Pense-bête</a><br>
+      <a href="sondages.html">Sondages</a>
+    </div>
+    <div class="foot-col">
+      <h4>Liens utiles</h4>
+      <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener">ENT / Pronote</a><br>
+      <a href="admin.html">Espace admin</a>
+    </div>
+  </div>
+  <div class="foot-bottom">Site pédagogique non officiel de la filière électrotechnique.</div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+function votedKey(pollId){ return "el_voted_" + pollId; }
+
+function renderPolls(){
+  const polls = getDB(DB_KEYS.polls).slice().reverse();
+  const wrap = document.getElementById("polls-wrap");
+  if(polls.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Aucun sondage publié pour le moment.</p>';
+    return;
+  }
+  wrap.innerHTML = polls.map(p=>{
+    const total = p.options.reduce((s,o)=>s+o.votes,0) || 1;
+    const hasVoted = !!localStorage.getItem(votedKey(p.id));
+    return `
+    <div class="poll-card">
+      <h3>${escapeHtml(p.question)}</h3>
+      <div>
+        ${p.options.map((o,i)=>{
+          const pct = Math.round((o.votes/total)*100);
+          if(hasVoted){
+            return `<div class="poll-option poll-voted"><div class="poll-option-row">
+              <div style="display:flex;justify-content:space-between;"><span>${escapeHtml(o.label)}</span><span class="poll-pct">${pct}%</span></div>
+              <div class="bar" style="width:${pct}%"></div>
+            </div></div>`;
+          }
+          return `<div class="poll-option" data-poll="${p.id}" data-idx="${i}"><span>${escapeHtml(o.label)}</span><span>➜</span></div>`;
+        }).join("")}
+      </div>
+      <div style="font-size:.75rem;color:var(--gris-2);margin-top:8px;">${total===1 && p.options.every(o=>o.votes===0) ? 0 : total} vote(s)</div>
+    </div>`;
+  }).join("");
+
+  wrap.querySelectorAll(".poll-option[data-poll]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const pollId = el.dataset.poll, idx = +el.dataset.idx;
+      const polls = getDB(DB_KEYS.polls);
+      const poll = polls.find(p=>p.id === pollId);
+      if(!poll) return;
+      poll.options[idx].votes++;
+      setDB(DB_KEYS.polls, polls);
+      localStorage.setItem(votedKey(pollId), "1");
+      renderPolls();
+      toast("Vote enregistré, merci !");
+    });
+  });
+}
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str || "";
+  return d.innerHTML;
+}
+document.addEventListener("DOMContentLoaded", renderPolls);
+</script>
+</body>
+</html>
