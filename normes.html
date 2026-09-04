@@ -15,7 +15,7 @@
       <img src="img/logo.png" alt="Logo">
       <span class="brand-text">Section<strong>Électrotechnique</strong></span>
     </a>
-    <nav class="main-nav">
+    <nav class="main-nav" id="main-nav">
       <a href="index.html">Accueil</a>
       <a href="normes.html">Normes</a>
       <a href="pense-bete.html">Pense-bête</a>
@@ -29,6 +29,9 @@
         <button data-mode="sombre" title="Thème sombre">SOM</button>
         <button data-mode="systeme" title="Suivre le système">SYS</button>
       </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </header>
@@ -36,16 +39,9 @@
 <section>
   <div class="container">
     <div class="section-head">
-      <div class="section-tag">RÉFÉRENTIEL</div>
+      <div class="ref-label">RÉFÉRENTIEL</div>
       <h2>Normes électriques de référence</h2>
-      <p>Synthèses pédagogiques des deux normes centrales de la filière. Ces fiches sont des résumés de travail, à compléter par la documentation officielle.</p>
-    </div>
-    
-    <div class="section-head" style="margin-top:48px;">
-      <div>
-        <div class="ref-label">DOCUMENTS</div>
-        <h2>Documents liés</h2>
-      </div>
+      <p>Documents ajoutés par l'équipe pédagogique — supports internes ou liens vers les sources officielles.</p>
     </div>
     <div id="docs-wrap" class="grid grid-2"></div>
   </div>

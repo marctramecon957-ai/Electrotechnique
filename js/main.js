@@ -64,6 +64,32 @@ function markActiveNav(){
   });
 }
 
+/* ---------- Menu mobile ---------- */
+function initMobileNav(){
+  const toggle = document.getElementById("nav-toggle");
+  const nav = document.getElementById("main-nav");
+  if(!toggle || !nav) return;
+  toggle.addEventListener("click", ()=>{
+    const open = nav.classList.toggle("open");
+    toggle.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  nav.querySelectorAll("a").forEach(a=>{
+    a.addEventListener("click", ()=>{
+      nav.classList.remove("open");
+      toggle.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
+  });
+  window.addEventListener("resize", ()=>{
+    if(window.innerWidth > 860){
+      nav.classList.remove("open");
+      toggle.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
 /* ---------- Init base : emails admin par défaut ---------- */
 function initDefaults(){
   if(!localStorage.getItem(DB_KEYS.emails)){
@@ -83,4 +109,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
   initDefaults();
   initTheme();
   markActiveNav();
+  initMobileNav();
 });

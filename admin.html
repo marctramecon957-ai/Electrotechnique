@@ -15,7 +15,7 @@
       <img src="img/logo.png" alt="Logo">
       <span class="brand-text">Section<strong>Électrotechnique</strong></span>
     </a>
-    <nav class="main-nav">
+    <nav class="main-nav" id="main-nav">
       <a href="index.html">Accueil</a>
       <a href="normes.html">Normes</a>
       <a href="pense-bete.html">Pense-bête</a>
@@ -29,6 +29,9 @@
         <button data-mode="sombre" title="Thème sombre">SOM</button>
         <button data-mode="systeme" title="Suivre le système">SYS</button>
       </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </header>
@@ -169,10 +172,12 @@
             <input id="new-access-email" type="email" placeholder="collegue@ac-xxxx.fr" style="flex:1;padding:9px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
             <button class="btn btn-bleu" id="add-access-btn">Ajouter</button>
           </div>
+          <div class="admin-table-wrap">
           <table class="admin-table">
             <thead><tr><th>E-mail</th><th>Statut</th><th></th></tr></thead>
             <tbody id="access-table-body"></tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>
