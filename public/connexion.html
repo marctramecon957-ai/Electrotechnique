@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="top-rule"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Accueil</a>
+      <a href="normes.html">Normes</a>
+      <a href="pense-bete.html">Pense-bête</a>
+      <a href="sondages.html">Sondages</a>
+      <a href="publications.html">Publications</a>
+      <a href="connexion.html" class="active">Connexion</a>
+    </nav>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="admin-shell">
+  <div class="container">
+
+    <div id="bootstrap-box" class="login-box hidden">
+      <h2>Configuration initiale</h2>
+      <p style="color:var(--text-soft);font-size:.88rem;">Aucun compte administrateur n'existe encore. Créez le vôtre pour piloter le site (classes, comptes profs et élèves).</p>
+      <label style="font-size:.82rem;font-weight:700;">Prénom</label>
+      <input id="bs-prenom" type="text" placeholder="Prénom">
+      <label style="font-size:.82rem;font-weight:700;">Nom</label>
+      <input id="bs-nom" type="text" placeholder="Nom">
+      <label style="font-size:.82rem;font-weight:700;">E-mail</label>
+      <input id="bs-email" type="email" placeholder="prenom.nom@ac-xxxx.fr">
+      <label style="font-size:.82rem;font-weight:700;">Mot de passe</label>
+      <input id="bs-pass" type="password" placeholder="Choisissez un mot de passe">
+      <button class="btn btn-jaune" style="width:100%;" id="bs-btn">Créer le compte administrateur</button>
+      <p id="bs-error" style="color:var(--rouge);font-size:.82rem;margin-top:10px;"></p>
+    </div>
+
+    <div id="login-box" class="login-box hidden">
+      <h2>Connexion</h2>
+      <p style="color:var(--text-soft);font-size:.88rem;">Élèves et professeurs : utilisez l'e-mail et le mot de passe qui vous ont été communiqués.</p>
+      <label style="font-size:.82rem;font-weight:700;">E-mail</label>
+      <input id="lg-email" type="email" placeholder="votre@email.fr">
+      <label style="font-size:.82rem;font-weight:700;">Mot de passe</label>
+      <input id="lg-pass" type="password" placeholder="Mot de passe">
+      <button class="btn btn-bleu" style="width:100%;" id="lg-btn">Se connecter</button>
+      <p id="lg-error" style="color:var(--rouge);font-size:.82rem;margin-top:10px;"></p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-col">
+      <h4>Électrotechnique</h4>
+      <p style="color:#b8b8b8;font-size:.85rem;max-width:220px;">Lycées Albert Londres — section électrotechnique.</p>
+    </div>
+  </div>
+  <div class="foot-bottom">Site pédagogique non officiel de la filière électrotechnique.</div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/app.js"></script>
+<script>
+async function init(){
+  const { hasAdmin } = await apiGet("/auth/status");
+  const { user } = await apiGet("/auth/me");
+  if(user){ await routeByAuthState(); return; }
+
+  if(!hasAdmin){
+    document.getElementById("bootstrap-box").classList.remove("hidden");
+  } else {
+    document.getElementById("login-box").classList.remove("hidden");
+  }
+}
+
+document.getElementById("bs-btn").addEventListener("click", async ()=>{
+  const errEl = document.getElementById("bs-error");
+  errEl.textContent = "";
+  try{
+    await apiPost("/auth/bootstrap", {
+      email: document.getElementById("bs-email").value,
+      password: document.getElementById("bs-pass").value,
+      prenom: document.getElementById("bs-prenom").value,
+      nom: document.getElementById("bs-nom").value
+    });
+    location.href = "espace-admin.html";
+  }catch(e){ errEl.textContent = e.message; }
+});
+
+document.getElementById("lg-btn").addEventListener("click", async ()=>{
+  const errEl = document.getElementById("lg-error");
+  errEl.textContent = "";
+  try{
+    await apiPost("/auth/login", {
+      email: document.getElementById("lg-email").value,
+      password: document.getElementById("lg-pass").value
+    });
+    await routeByAuthState();
+  }catch(e){ errEl.textContent = e.message; }
+});
+
+init();
+</script>
+</body>
+</html>

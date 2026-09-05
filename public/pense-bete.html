@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pense-bête — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="top-rule"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Accueil</a>
+      <a href="normes.html">Normes</a>
+      <a href="pense-bete.html">Pense-bête</a>
+      <a href="sondages.html">Sondages</a>
+      <a href="publications.html">Publications</a>
+      <a href="connexion.html">Connexion</a>
+    </nav>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="ref-label">ESPACE PERSONNEL</div>
+      <h2>Mon pense-bête</h2>
+      <p>Vos notes sont enregistrées uniquement sur cet appareil (aucun compte requis). Idéal pour un rappel de TP, une date de rendu ou un point de cours à revoir.</p>
+    </div>
+
+    <div class="notes-wrap">
+      <form class="note-form" id="note-form">
+        <label for="n-title">Titre</label>
+        <input id="n-title" type="text" placeholder="Ex. Rendre le compte-rendu TP variateur" required>
+        <label for="n-text">Détail</label>
+        <textarea id="n-text" placeholder="Ex. Pour vendredi, section 3 uniquement"></textarea>
+        <label for="n-prio">Priorité</label>
+        <select id="n-prio">
+          <option value="normale">Normale</option>
+          <option value="haute">Haute</option>
+          <option value="basse">Basse</option>
+        </select>
+        <button type="submit" class="btn btn-jaune" style="margin-top:16px;width:100%;">Ajouter la note</button>
+      </form>
+
+      <div>
+        <div id="notes-list" class="notes-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-col">
+      <h4>Électrotechnique</h4>
+      <p style="color:#b8b8b8;font-size:.85rem;max-width:220px;">Lycées Albert Londres — section électrotechnique.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Navigation</h4>
+      <a href="normes.html">Normes</a><br>
+      <a href="pense-bete.html">Pense-bête</a><br>
+      <a href="sondages.html">Sondages</a>
+    </div>
+    <div class="foot-col">
+      <h4>Liens utiles</h4>
+      <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener">ENT / Pronote</a><br>
+      <a href="connexion.html">Connexion</a>
+    </div>
+  </div>
+  <div class="foot-bottom">Site pédagogique non officiel de la filière électrotechnique.</div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+function renderNotes(){
+  const notes = getDB(DB_KEYS.notes).slice().sort((a,b)=> b.date - a.date);
+  const wrap = document.getElementById("notes-list");
+  if(notes.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Aucune note pour le moment. Ajoutez votre premier rappel à gauche.</p>';
+    return;
+  }
+  wrap.innerHTML = notes.map(n=>`
+    <div class="note-item prio-${n.priority}">
+      <button class="note-del" data-id="${n.id}" title="Supprimer">✕</button>
+      <h4>${escapeHtml(n.title)}</h4>
+      ${n.text ? `<p>${escapeHtml(n.text)}</p>` : ""}
+      <div class="note-meta">${new Date(n.date).toLocaleString('fr-FR')} · priorité ${n.priority}</div>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".note-del").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const notes = getDB(DB_KEYS.notes).filter(n=>n.id !== btn.dataset.id);
+      setDB(DB_KEYS.notes, notes);
+      renderNotes();
+      toast("Note supprimée");
+    });
+  });
+}
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str || "";
+  return d.innerHTML;
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+  renderNotes();
+  document.getElementById("note-form").addEventListener("submit", e=>{
+    e.preventDefault();
+    const title = document.getElementById("n-title").value.trim();
+    if(!title) return;
+    const notes = getDB(DB_KEYS.notes);
+    notes.push({
+      id: uid(),
+      title,
+      text: document.getElementById("n-text").value.trim(),
+      priority: document.getElementById("n-prio").value,
+      date: Date.now()
+    });
+    setDB(DB_KEYS.notes, notes);
+    e.target.reset();
+    renderNotes();
+    toast("Note ajoutée");
+  });
+});
+</script>
+</body>
+</html>

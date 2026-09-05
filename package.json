@@ -1,0 +1,20 @@
+{
+  "name": "electrotechnique-site",
+  "version": "1.0.0",
+  "description": "Site de la section électrotechnique — Lycées Albert Londres",
+  "main": "server.js",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "multer": "^2.3.0",
+    "uuid": "^14.0.2"
+  }
+}

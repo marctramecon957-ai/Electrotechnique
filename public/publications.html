@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Publications — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="top-rule"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Accueil</a>
+      <a href="normes.html">Normes</a>
+      <a href="pense-bete.html">Pense-bête</a>
+      <a href="sondages.html">Sondages</a>
+      <a href="publications.html">Publications</a>
+      <a href="connexion.html">Connexion</a>
+    </nav>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="ref-label">ACTUALITÉS</div>
+      <h2>Publications de la section</h2>
+      <p>Articles, nouvelles normes et informations publiés par l'équipe pédagogique depuis l'espace admin.</p>
+    </div>
+    <div id="posts-wrap" class="grid grid-3"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-col">
+      <h4>Électrotechnique</h4>
+      <p style="color:#b8b8b8;font-size:.85rem;max-width:220px;">Lycées Albert Londres — section électrotechnique.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Navigation</h4>
+      <a href="normes.html">Normes</a><br>
+      <a href="pense-bete.html">Pense-bête</a><br>
+      <a href="sondages.html">Sondages</a>
+    </div>
+    <div class="foot-col">
+      <h4>Liens utiles</h4>
+      <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener">ENT / Pronote</a><br>
+      <a href="connexion.html">Connexion</a>
+    </div>
+  </div>
+  <div class="foot-bottom">Site pédagogique non officiel de la filière électrotechnique.</div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+function renderPosts(){
+  const posts = getDB(DB_KEYS.posts).slice().reverse();
+  const wrap = document.getElementById("posts-wrap");
+  if(posts.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Aucune publication pour le moment.</p>';
+    return;
+  }
+  wrap.innerHTML = posts.map(p=>`
+    <div class="card">
+      <span class="tag">${escapeHtml(p.category || "Info")}</span>
+      <h3>${escapeHtml(p.title)}</h3>
+      <p>${escapeHtml(p.content)}</p>
+      <div style="font-size:.75rem;color:var(--gris-2);">Publié le ${new Date(p.date).toLocaleDateString('fr-FR')} — ${escapeHtml(p.author||"Équipe")}</div>
+    </div>
+  `).join("");
+}
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str || "";
+  return d.innerHTML;
+}
+document.addEventListener("DOMContentLoaded", renderPosts);
+</script>
+</body>
+</html>

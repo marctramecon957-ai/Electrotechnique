@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Électrotechnique — Lycées Albert Londres</title>
+<meta name="description" content="Site de la filière Électrotechnique — ressources, normes, ENT et vie de la section.">
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="top-rule"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo Lycées Albert Londres">
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Accueil</a>
+      <a href="normes.html">Normes</a>
+      <a href="pense-bete.html">Pense-bête</a>
+      <a href="sondages.html">Sondages</a>
+      <a href="publications.html">Publications</a>
+      <a href="connexion.html">Connexion</a>
+    </nav>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="hero-eyebrow">Lycées Albert Londres — filière électrotechnique</div>
+      <h1>L'espace de travail de la section électrotechnique</h1>
+      <p>ENT et Pronote, normes de référence, pense-bête personnel et publications de l'équipe pédagogique — réunis au même endroit.</p>
+      <div class="hero-cta">
+        <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener" class="btn btn-jaune">Ouvrir l'ENT / Pronote</a>
+        <a href="normes.html" class="btn btn-ghost">Consulter les normes</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img src="img/banniere.jpg" alt="Élèves devant les Lycées Albert Londres">
+      <span class="plate-tag">LYCÉES ALBERT LONDRES</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="ref-label">ACCÈS RAPIDE</div>
+      <h2>Ce que vous pouvez faire ici</h2>
+      <p>Un espace pensé pour les élèves et l'équipe pédagogique de la filière électrotechnique.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <span class="tag">ENT</span>
+        <h3>Pronote &amp; ENT Auvergne-Rhône-Alpes</h3>
+        <p>Cahier de texte, notes, absences et messagerie : accédez directement au portail académique.</p>
+        <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener" class="btn btn-bleu btn-sm">Se connecter</a>
+      </div>
+      <div class="card">
+        <span class="tag rouge">Normes</span>
+        <h3>NFC 15-100 &amp; EN 60204-1</h3>
+        <p>Fiches de synthèse sur les normes d'installation électrique basse tension et de sécurité des machines.</p>
+        <a href="normes.html" class="btn btn-rouge btn-sm">Voir les normes</a>
+      </div>
+      <div class="card">
+        <span class="tag jaune">Perso</span>
+        <h3>Pense-bête</h3>
+        <p>Notez vos rappels de TP, dates de rendu ou points de cours à revoir. Enregistré sur votre appareil.</p>
+        <a href="pense-bete.html" class="btn btn-jaune btn-sm">Ouvrir mon pense-bête</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="container">
+    <div class="ent-box">
+      <div class="ent-icon">ENT</div>
+      <div style="flex:1;min-width:220px;">
+        <h3>Espace Numérique de Travail</h3>
+        <p>L'ENT Auvergne-Rhône-Alpes centralise Pronote, la messagerie et les ressources pédagogiques de l'établissement.</p>
+        <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener" class="btn btn-jaune btn-sm">ent.auvergnerhonealpes.fr</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="ref-label">VIE DE LA SECTION</div>
+      <h2>Dernières publications</h2>
+      <p>Postes et informations publiés par l'équipe pédagogique.</p>
+    </div>
+    <div id="home-posts" class="grid grid-3">
+      <p class="empty-state">Chargement des publications…</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-col">
+      <h4>Électrotechnique</h4>
+      <p style="color:#b8b8b8;font-size:.85rem;max-width:220px;">Lycées Albert Londres — section électrotechnique.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Navigation</h4>
+      <a href="normes.html">Normes</a><br>
+      <a href="pense-bete.html">Pense-bête</a><br>
+      <a href="sondages.html">Sondages</a>
+    </div>
+    <div class="foot-col">
+      <h4>Liens utiles</h4>
+      <a href="https://www.ent.auvergnerhonealpes.fr" target="_blank" rel="noopener">ENT / Pronote</a><br>
+      <a href="connexion.html">Connexion</a>
+    </div>
+  </div>
+  <div class="foot-bottom">Site pédagogique non officiel de la filière électrotechnique.</div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", ()=>{
+  const posts = getDB(DB_KEYS.posts).slice().reverse().slice(0,3);
+  const wrap = document.getElementById("home-posts");
+  if(posts.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Aucune publication pour le moment. L\'équipe pédagogique publiera bientôt ici.</p>';
+    return;
+  }
+  wrap.innerHTML = posts.map(p=>`
+    <div class="card">
+      <span class="tag">${p.category || "Info"}</span>
+      <h3>${escapeHtml(p.title)}</h3>
+      <p>${escapeHtml(p.content).slice(0,140)}${p.content.length>140?"…":""}</p>
+      <div style="font-size:.75rem;color:var(--gris-2);">Publié le ${new Date(p.date).toLocaleDateString('fr-FR')} — ${escapeHtml(p.author||"Équipe")}</div>
+    </div>
+  `).join("");
+});
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str || "";
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace professeur — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="top-rule"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
+    </a>
+    <div></div>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="admin-shell">
+  <div class="container">
+    <div class="admin-topbar">
+      <div>
+        <strong id="user-label"></strong>
+        <div style="font-size:.78rem;color:var(--text-soft);">Espace professeur</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Déconnexion</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" data-tab="devoirs">Devoirs / TP</button>
+      <button class="admin-tab-btn" data-tab="notes">Notes</button>
+      <button class="admin-tab-btn" data-tab="moyennes">Moyennes</button>
+      <button class="admin-tab-btn" data-tab="suivi">Suivi</button>
+    </div>
+
+    <!-- Devoirs / TP -->
+    <div class="admin-panel active" id="panel-devoirs">
+      <div class="card" style="margin-bottom:24px;">
+        <h3>Publier un devoir ou un TP</h3>
+        <div class="field-row">
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Titre</label>
+            <input id="as-title" type="text" placeholder="Ex. TP variateur de vitesse" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Type</label>
+            <select id="as-type" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+              <option value="devoir">Devoir</option>
+              <option value="tp">TP</option>
+            </select>
+          </div>
+        </div>
+        <label style="font-size:.82rem;font-weight:700;display:block;margin-top:10px;">Description</label>
+        <textarea id="as-desc" style="width:100%;min-height:80px;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);"></textarea>
+
+        <div class="field-row" style="margin-top:10px;">
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Date limite (optionnelle)</label>
+            <input id="as-due" type="date" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+            <p style="font-size:.76rem;color:var(--text-soft);margin:4px 0 0;">Passé cette date, un devoir non noté compte pour 0.</p>
+          </div>
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Document (optionnel)</label>
+            <input id="as-doc" type="file" style="width:100%;padding:6px 0;">
+          </div>
+        </div>
+
+        <div class="field-row" style="margin-top:10px;">
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Coefficient</label>
+            <input id="as-coef" type="number" min="0.5" step="0.5" value="1" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Noté sur</label>
+            <input id="as-maxnote" type="number" min="1" value="20" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+        </div>
+
+        <label style="font-size:.82rem;font-weight:700;display:block;margin-top:10px;">Classes concernées</label>
+        <div id="as-classes"></div>
+
+        <button class="btn btn-jaune" id="as-create-btn" style="margin-top:14px;">Publier</button>
+      </div>
+      <h3>Devoirs / TP publiés</h3>
+      <div id="as-list"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="admin-panel" id="panel-notes">
+      <h3 id="notes-context-title">Notes — sélectionnez un devoir/TP dans l'onglet précédent</h3>
+      <div id="notes-grade-table"></div>
+    </div>
+
+    <!-- Moyennes -->
+    <div class="admin-panel" id="panel-moyennes">
+      <h3>Choisissez une classe</h3>
+      <div id="avg-class-buttons" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;"></div>
+      <div id="avg-results"></div>
+    </div>
+
+    <!-- Suivi -->
+    <div class="admin-panel" id="panel-suivi">
+      <h3>Choisissez une classe</h3>
+      <div id="suivi-class-buttons" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;"></div>
+      <div id="suivi-results"></div>
+    </div>
+
+  </div>
+</section>
+
+<script src="js/main.js"></script>
+<script src="js/app.js"></script>
+<script src="js/app-prof.js"></script>
+<script>
+(async ()=>{
+  const { user } = await apiGet("/auth/me");
+  if(!user){ location.href = "connexion.html"; return; }
+  if(user.mustChangePassword){ location.href = "changer-mot-de-passe.html"; return; }
+  if(user.role === "eleve"){ location.href = "espace-eleve.html"; return; }
+  if(user.role === "admin"){ location.href = "espace-admin.html"; return; }
+  document.getElementById("user-label").textContent = user.prenom + " " + user.nom;
+  await initProfFeatures();
+})();
+
+document.getElementById("logout-btn").addEventListener("click", async ()=>{
+  await apiPost("/auth/logout");
+  location.href = "connexion.html";
+});
+
+document.querySelectorAll(".admin-tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".admin-tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".admin-panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+  });
+});
+</script>
+</body>
+</html>

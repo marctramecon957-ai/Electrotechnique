@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon espace — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="top-rule"></div>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <img src="img/logo.png" alt="Logo">
+      <span class="brand-text">Section<strong>Électrotechnique</strong></span>
+    </a>
+    <div></div>
+    <div class="header-actions">
+      <div class="theme-switch">
+        <button data-mode="clair" title="Thème clair">CLR</button>
+        <button data-mode="sombre" title="Thème sombre">SOM</button>
+        <button data-mode="systeme" title="Suivre le système">SYS</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="admin-shell">
+  <div class="container">
+    <div class="admin-topbar">
+      <div>
+        <strong id="user-label"></strong>
+        <div style="font-size:.78rem;color:var(--text-soft);">Mon espace élève</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Déconnexion</button>
+    </div>
+
+    <div class="section-head">
+      <div class="ref-label">MOYENNE</div>
+      <h2 id="avg-title">Moyenne générale : —</h2>
+    </div>
+
+    <div class="section-head" style="margin-top:40px;">
+      <div class="ref-label">TRAVAIL À FAIRE</div>
+      <h2>Mes devoirs et TP</h2>
+      <p>Documents et échéances de votre classe. Un devoir non rendu après la date limite compte pour 0.</p>
+    </div>
+    <div id="assignments-list" class="grid grid-2"></div>
+  </div>
+</section>
+
+<script src="js/main.js"></script>
+<script src="js/app.js"></script>
+<script>
+let CURRENT_USER = null;
+
+(async ()=>{
+  const { user } = await apiGet("/auth/me");
+  if(!user){ location.href = "connexion.html"; return; }
+  if(user.mustChangePassword){ location.href = "changer-mot-de-passe.html"; return; }
+  if(!user.profileComplete){ location.href = "complement-profil.html"; return; }
+  if(user.role !== "eleve"){ location.href = user.role === "admin" ? "espace-admin.html" : "espace-prof.html"; return; }
+  CURRENT_USER = user;
+  document.getElementById("user-label").textContent = user.prenom + " " + user.nom;
+  await loadAverage();
+  await loadAssignments();
+})();
+
+document.getElementById("logout-btn").addEventListener("click", async ()=>{
+  await apiPost("/auth/logout");
+  location.href = "connexion.html";
+});
+
+async function loadAverage(){
+  const { average } = await apiGet("/grades/me");
+  document.getElementById("avg-title").textContent = "Moyenne générale : " + (average !== null ? average + "/20" : "—");
+}
+
+function statusLabel(status){
+  if(status==="note") return {text:"Noté", cls:""};
+  if(status==="non_fait") return {text:"Non fait (0)", cls:"rouge"};
+  return {text:"À venir", cls:"jaune"};
+}
+
+async function loadAssignments(){
+  const { assignments } = await apiGet("/assignments");
+  const { details } = await apiGet("/grades/me");
+  const wrap = document.getElementById("assignments-list");
+  if(assignments.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Aucun devoir ou TP publié pour votre classe pour le moment.</p>';
+    return;
+  }
+  wrap.innerHTML = assignments.map(a=>{
+    const d = details.find(x=>x.assignmentId===a.id);
+    const st = d ? statusLabel(d.status) : {text:"—",cls:""};
+    return `
+    <div class="card">
+      <span class="tag ${st.cls}">${a.type==='tp'?'TP':'Devoir'} · ${st.text}</span>
+      <h3>${escapeHtml(a.title)}</h3>
+      <p>${escapeHtml(a.description)}</p>
+      <p style="font-size:.8rem;">Échéance : ${fmtDate(a.dueDate)} · Coefficient ${a.coefficient} · Noté sur ${a.maxNote}
+      ${d && d.status==='note' ? ' · Note obtenue : <strong>'+d.note+'/'+a.maxNote+'</strong>' : ''}</p>
+      ${a.documentPath ? `<a class="btn btn-bleu btn-sm" href="${a.documentPath}" target="_blank" rel="noopener">Télécharger le document</a>` : ""}
+    </div>`;
+  }).join("");
+}
+</script>
+</body>
+</html>
