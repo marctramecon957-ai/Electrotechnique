@@ -70,10 +70,9 @@
 
 <script src="js/main.js"></script>
 <script>
-function votedKey(pollId){ return "el_voted_" + pollId; }
-
-function renderPolls(){
-  const polls = getDB(DB_KEYS.polls).slice().reverse();
+async function renderPolls(){
+  const r = await fetch("/api/content/polls", { credentials:"same-origin" });
+  const { polls } = await r.json();
   const wrap = document.getElementById("polls-wrap");
   if(polls.length === 0){
     wrap.innerHTML = '<p class="empty-state">Aucun sondage publié pour le moment.</p>';
@@ -81,14 +80,13 @@ function renderPolls(){
   }
   wrap.innerHTML = polls.map(p=>{
     const total = p.options.reduce((s,o)=>s+o.votes,0) || 1;
-    const hasVoted = !!localStorage.getItem(votedKey(p.id));
     return `
     <div class="poll-card">
       <h3>${escapeHtml(p.question)}</h3>
       <div>
         ${p.options.map((o,i)=>{
           const pct = Math.round((o.votes/total)*100);
-          if(hasVoted){
+          if(p.hasVoted){
             return `<div class="poll-option poll-voted"><div class="poll-option-row">
               <div style="display:flex;justify-content:space-between;"><span>${escapeHtml(o.label)}</span><span class="poll-pct">${pct}%</span></div>
               <div class="bar" style="width:${pct}%"></div>
@@ -102,14 +100,15 @@ function renderPolls(){
   }).join("");
 
   wrap.querySelectorAll(".poll-option[data-poll]").forEach(el=>{
-    el.addEventListener("click", ()=>{
+    el.addEventListener("click", async ()=>{
       const pollId = el.dataset.poll, idx = +el.dataset.idx;
-      const polls = getDB(DB_KEYS.polls);
-      const poll = polls.find(p=>p.id === pollId);
-      if(!poll) return;
-      poll.options[idx].votes++;
-      setDB(DB_KEYS.polls, polls);
-      localStorage.setItem(votedKey(pollId), "1");
+      const resp = await fetch(`/api/content/polls/${pollId}/vote`, {
+        method:"POST", credentials:"same-origin",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ optionIndex: idx })
+      });
+      const data = await resp.json();
+      if(!resp.ok){ toast(data.error || "Erreur"); return; }
       renderPolls();
       toast("Vote enregistré, merci !");
     });

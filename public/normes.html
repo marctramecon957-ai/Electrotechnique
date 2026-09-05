@@ -70,14 +70,15 @@
 
 <script src="js/main.js"></script>
 <script>
-function renderDocs(){
-  const docs = getDB(DB_KEYS.documents).slice().reverse();
+async function renderDocs(){
+  const r = await fetch("/api/content/documents");
+  const { documents } = await r.json();
   const wrap = document.getElementById("docs-wrap");
-  if(docs.length === 0){
+  if(documents.length === 0){
     wrap.innerHTML = '<p class="empty-state">Aucun document publié pour le moment.</p>';
     return;
   }
-  wrap.innerHTML = docs.map(d=>`
+  wrap.innerHTML = documents.map(d=>`
     <div class="card">
       <span class="tag ${d.type==='officiel' ? 'rouge' : ''}">${d.type==='officiel' ? 'Source officielle' : 'Support interne'}${d.norme ? ' · '+escapeHtml(d.norme) : ''}</span>
       <h3>${escapeHtml(d.title)}</h3>

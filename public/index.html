@@ -135,19 +135,21 @@
 
 <script src="js/main.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", ()=>{
-  const posts = getDB(DB_KEYS.posts).slice().reverse().slice(0,3);
+document.addEventListener("DOMContentLoaded", async ()=>{
+  const r = await fetch("/api/content/posts");
+  const { posts } = await r.json();
+  const list = posts.slice(0,3);
   const wrap = document.getElementById("home-posts");
-  if(posts.length === 0){
+  if(list.length === 0){
     wrap.innerHTML = '<p class="empty-state">Aucune publication pour le moment. L\'équipe pédagogique publiera bientôt ici.</p>';
     return;
   }
-  wrap.innerHTML = posts.map(p=>`
+  wrap.innerHTML = list.map(p=>`
     <div class="card">
       <span class="tag">${p.category || "Info"}</span>
       <h3>${escapeHtml(p.title)}</h3>
       <p>${escapeHtml(p.content).slice(0,140)}${p.content.length>140?"…":""}</p>
-      <div style="font-size:.75rem;color:var(--gris-2);">Publié le ${new Date(p.date).toLocaleDateString('fr-FR')} — ${escapeHtml(p.author||"Équipe")}</div>
+      <div style="font-size:.75rem;color:var(--gris-2);">Publié le ${new Date(p.date).toLocaleDateString('fr-FR')}</div>
     </div>
   `).join("");
 });

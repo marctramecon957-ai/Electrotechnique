@@ -1,17 +1,20 @@
 const express = require("express");
 const session = require("express-session");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const assignmentRoutes = require("./routes/assignments");
 const gradeRoutes = require("./routes/grades");
+const contentRoutes = require("./routes/content");
 const { readDB, connect } = require("./lib/db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(session({
   secret: process.env.SESSION_SECRET || "electrotechnique-albert-londres-secret",
   resave: false,
@@ -26,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/grades", gradeRoutes);
+app.use("/api/content", contentRoutes);
 
 // Liste des classes, accessible à tout utilisateur connecté (choix de classe à la 1ère connexion)
 app.get("/api/classes-publiques", async (req, res)=>{

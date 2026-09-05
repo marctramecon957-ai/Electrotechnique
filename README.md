@@ -25,6 +25,12 @@ la version précédente (localStorage).
   moyenne de la classe entière.
 - **Suivi par classe** : un bouton par classe affiche un tableau des
   élèves avec leurs devoirs/TP non faits (en retard, non notés).
+- **Publications, sondages, documents (normes)** : gérés depuis l'onglet
+  correspondant de l'espace admin, stockés eux aussi dans MongoDB (donc
+  visibles par tous, contrairement à la toute première version du site
+  qui les gardait uniquement dans le navigateur). Le vote aux sondages
+  est ouvert à tout visiteur (sans compte), avec un anti-double-vote par
+  cookie anonyme.
 
 ## ⚠️ Persistance des données : MongoDB Atlas (gratuit)
 

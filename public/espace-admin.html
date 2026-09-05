@@ -43,6 +43,9 @@
       <button class="admin-tab-btn" data-tab="notes">Notes</button>
       <button class="admin-tab-btn" data-tab="moyennes">Moyennes</button>
       <button class="admin-tab-btn" data-tab="suivi">Suivi</button>
+      <button class="admin-tab-btn" data-tab="publications">Publications</button>
+      <button class="admin-tab-btn" data-tab="sondages">Sondages</button>
+      <button class="admin-tab-btn" data-tab="documents">Documents</button>
     </div>
 
     <!-- Classes -->
@@ -169,6 +172,86 @@
       <div id="suivi-results"></div>
     </div>
 
+    <!-- Publications -->
+    <div class="admin-panel" id="panel-publications">
+      <div class="card" style="margin-bottom:24px;">
+        <h3>Publier une actualité</h3>
+        <div class="field-row">
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Titre</label>
+            <input id="post-title" type="text" placeholder="Ex. Réunion parents-professeurs" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Catégorie</label>
+            <select id="post-cat" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+              <option>Info</option>
+              <option>Événement</option>
+              <option>Norme</option>
+              <option>TP</option>
+            </select>
+          </div>
+        </div>
+        <label style="font-size:.82rem;font-weight:700;display:block;margin-top:10px;">Contenu</label>
+        <textarea id="post-content" style="width:100%;min-height:90px;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);"></textarea>
+        <button class="btn btn-jaune" id="post-create-btn" style="margin-top:14px;">Publier</button>
+      </div>
+      <h3>Publications existantes</h3>
+      <div id="post-list"></div>
+    </div>
+
+    <!-- Sondages -->
+    <div class="admin-panel" id="panel-sondages">
+      <div class="card" style="margin-bottom:24px;">
+        <h3>Créer un sondage</h3>
+        <label style="font-size:.82rem;font-weight:700;">Question</label>
+        <input id="poll-question" type="text" placeholder="Ex. Quel logiciel préférez-vous pour les schémas ?" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);margin-bottom:10px;">
+        <label style="font-size:.82rem;font-weight:700;">Options de réponse</label>
+        <div id="poll-options"></div>
+        <button class="btn btn-ghost btn-sm" id="add-option-btn" type="button" style="margin:8px 0;">+ Ajouter une option</button><br>
+        <button class="btn btn-jaune" id="poll-create-btn">Publier le sondage</button>
+      </div>
+      <h3>Sondages publiés</h3>
+      <div id="poll-list"></div>
+    </div>
+
+    <!-- Documents -->
+    <div class="admin-panel" id="panel-documents">
+      <div class="card" style="margin-bottom:24px;">
+        <h3>Ajouter un document (normes)</h3>
+        <p style="color:var(--text-soft);font-size:.88rem;">
+          Les normes officielles (NFC 15-100, EN 60204-1…) sont des documents payants,
+          protégés par le droit d'auteur : impossible de les héberger en PDF complet ici.
+          Ajoutez un lien vers vos propres supports (droits vérifiés) ou vers la source officielle.
+        </p>
+        <div class="field-row">
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Titre</label>
+            <input id="doc-title" type="text" placeholder="Ex. Fiche NFC 15-100" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Norme concernée</label>
+            <input id="doc-norme" type="text" placeholder="Ex. NFC 15-100" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+        </div>
+        <div class="field-row" style="margin-top:10px;">
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Lien (URL)</label>
+            <input id="doc-url" type="url" placeholder="https://..." style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Type</label>
+            <select id="doc-type" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+              <option value="interne">Support interne (droits vérifiés)</option>
+              <option value="officiel">Source officielle</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-jaune" id="doc-create-btn" style="margin-top:14px;">Ajouter</button>
+      </div>
+      <h3>Documents disponibles</h3>
+      <div id="doc-list"></div>
+    </div>
+
   </div>
 </section>
 
@@ -186,6 +269,9 @@
   await renderUsersTable();
   initClassForm();
   initUserForm();
+  initPublications();
+  initSondages();
+  initDocuments();
 })();
 
 document.getElementById("logout-btn").addEventListener("click", async ()=>{
@@ -282,6 +368,132 @@ async function renderUsersTable(){
       const { tempPassword } = await apiPost("/admin/users/" + btn.dataset.id + "/reset-password");
       toast("Nouveau mot de passe provisoire : " + tempPassword);
       renderUsersTable();
+    });
+  });
+}
+
+/* ---- Publications ---- */
+function initPublications(){
+  document.getElementById("post-create-btn").addEventListener("click", async ()=>{
+    const title = document.getElementById("post-title").value.trim();
+    const content = document.getElementById("post-content").value.trim();
+    const category = document.getElementById("post-cat").value;
+    if(!title || !content){ toast("Titre et contenu requis"); return; }
+    try{
+      await apiPost("/content/posts", { title, content, category });
+      document.getElementById("post-title").value = "";
+      document.getElementById("post-content").value = "";
+      toast("Publication ajoutée");
+      renderPosts();
+    }catch(e){ toast(e.message); }
+  });
+  renderPosts();
+}
+async function renderPosts(){
+  const { posts } = await apiGet("/content/posts");
+  const wrap = document.getElementById("post-list");
+  wrap.innerHTML = posts.length ? posts.map(p=>`
+    <div class="card" style="margin-bottom:14px;">
+      <span class="tag">${escapeHtml(p.category)}</span>
+      <h3>${escapeHtml(p.title)}</h3>
+      <p>${escapeHtml(p.content)}</p>
+      <button class="btn btn-rouge btn-sm del-post" data-id="${p.id}">Supprimer</button>
+    </div>
+  `).join("") : '<p class="empty-state">Aucune publication.</p>';
+  wrap.querySelectorAll(".del-post").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      await apiDelete("/content/posts/" + btn.dataset.id);
+      toast("Publication supprimée");
+      renderPosts();
+    });
+  });
+}
+
+/* ---- Sondages ---- */
+function pollOptionRowHtml(){
+  return `<div class="opt-input-row"><input type="text" class="poll-opt-input" placeholder="Libellé de l'option" style="padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);"><button type="button" class="btn btn-ghost btn-sm remove-opt">✕</button></div>`;
+}
+function initSondages(){
+  const wrap = document.getElementById("poll-options");
+  wrap.insertAdjacentHTML("beforeend", pollOptionRowHtml());
+  wrap.insertAdjacentHTML("beforeend", pollOptionRowHtml());
+  wrap.addEventListener("click", e=>{
+    if(e.target.classList.contains("remove-opt")) e.target.closest(".opt-input-row").remove();
+  });
+  document.getElementById("add-option-btn").addEventListener("click", ()=>{
+    wrap.insertAdjacentHTML("beforeend", pollOptionRowHtml());
+  });
+  document.getElementById("poll-create-btn").addEventListener("click", async ()=>{
+    const question = document.getElementById("poll-question").value.trim();
+    const options = [...document.querySelectorAll(".poll-opt-input")].map(i=>i.value.trim()).filter(Boolean);
+    if(!question || options.length < 2){ toast("Question + au moins 2 options requises"); return; }
+    try{
+      await apiPost("/content/polls", { question, options });
+      document.getElementById("poll-question").value = "";
+      wrap.innerHTML = "";
+      wrap.insertAdjacentHTML("beforeend", pollOptionRowHtml());
+      wrap.insertAdjacentHTML("beforeend", pollOptionRowHtml());
+      toast("Sondage publié");
+      renderPollsAdminList();
+    }catch(e){ toast(e.message); }
+  });
+  renderPollsAdminList();
+}
+async function renderPollsAdminList(){
+  const { polls } = await apiGet("/content/polls");
+  const wrap = document.getElementById("poll-list");
+  wrap.innerHTML = polls.length ? polls.map(p=>{
+    const total = p.options.reduce((s,o)=>s+o.votes,0);
+    return `<div class="card" style="margin-bottom:14px;">
+      <h3>${escapeHtml(p.question)}</h3>
+      <p style="font-size:.82rem;">${total} vote(s) — ${p.options.map(o=>`${escapeHtml(o.label)}: ${o.votes}`).join(" · ")}</p>
+      <button class="btn btn-rouge btn-sm del-poll" data-id="${p.id}">Supprimer</button>
+    </div>`;
+  }).join("") : '<p class="empty-state">Aucun sondage.</p>';
+  wrap.querySelectorAll(".del-poll").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      await apiDelete("/content/polls/" + btn.dataset.id);
+      toast("Sondage supprimé");
+      renderPollsAdminList();
+    });
+  });
+}
+
+/* ---- Documents ---- */
+function initDocuments(){
+  document.getElementById("doc-create-btn").addEventListener("click", async ()=>{
+    const title = document.getElementById("doc-title").value.trim();
+    const norme = document.getElementById("doc-norme").value.trim();
+    const url = document.getElementById("doc-url").value.trim();
+    const type = document.getElementById("doc-type").value;
+    if(!title || !url){ toast("Titre et lien requis"); return; }
+    try{
+      await apiPost("/content/documents", { title, norme, url, type });
+      document.getElementById("doc-title").value = "";
+      document.getElementById("doc-norme").value = "";
+      document.getElementById("doc-url").value = "";
+      toast("Document ajouté");
+      renderDocsAdminList();
+    }catch(e){ toast(e.message); }
+  });
+  renderDocsAdminList();
+}
+async function renderDocsAdminList(){
+  const { documents } = await apiGet("/content/documents");
+  const wrap = document.getElementById("doc-list");
+  wrap.innerHTML = documents.length ? documents.map(d=>`
+    <div class="card" style="margin-bottom:14px;">
+      <span class="tag ${d.type==='officiel'?'rouge':''}">${d.type==='officiel'?'Source officielle':'Support interne'}${d.norme ? ' · '+escapeHtml(d.norme) : ''}</span>
+      <h3>${escapeHtml(d.title)}</h3>
+      <p style="word-break:break-all;">${escapeHtml(d.url)}</p>
+      <button class="btn btn-rouge btn-sm del-doc" data-id="${d.id}">Supprimer</button>
+    </div>
+  `).join("") : '<p class="empty-state">Aucun document.</p>';
+  wrap.querySelectorAll(".del-doc").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      await apiDelete("/content/documents/" + btn.dataset.id);
+      toast("Document supprimé");
+      renderDocsAdminList();
     });
   });
 }
