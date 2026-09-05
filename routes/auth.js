@@ -13,15 +13,15 @@ function publicUser(u){
 }
 
 /* ---- État : y a-t-il déjà un admin ? ---- */
-router.get("/status", (req, res)=>{
-  const db = readDB();
+router.get("/status", async (req, res)=>{
+  const db = await readDB();
   const hasAdmin = db.users.some(u=>u.role==="admin");
   res.json({ hasAdmin });
 });
 
 /* ---- Bootstrap : création du 1er compte admin (propriétaire du site) ---- */
-router.post("/bootstrap", (req, res)=>{
-  const db = readDB();
+router.post("/bootstrap", async (req, res)=>{
+  const db = await readDB();
   if(db.users.some(u=>u.role==="admin")){
     return res.status(400).json({error:"Un compte administrateur existe déjà."});
   }
@@ -33,15 +33,15 @@ router.post("/bootstrap", (req, res)=>{
     passwordHash: hashPassword(password), mustChangePassword: false
   };
   db.users.push(user);
-  writeDB(db);
+  await writeDB(db);
   req.session.userId = user.id; req.session.role = user.role;
   res.json({ user: publicUser(user) });
 });
 
 /* ---- Connexion ---- */
-router.post("/login", (req, res)=>{
+router.post("/login", async (req, res)=>{
   const { email, password } = req.body;
-  const db = readDB();
+  const db = await readDB();
   const user = db.users.find(u=>u.email === (email||"").toLowerCase().trim());
   if(!user || !checkPassword(password||"", user.passwordHash)){
     return res.status(401).json({error:"E-mail ou mot de passe incorrect."});
@@ -50,43 +50,43 @@ router.post("/login", (req, res)=>{
   res.json({ user: publicUser(user) });
 });
 
-router.post("/logout", (req, res)=>{
+router.post("/logout", async (req, res)=>{
   req.session.destroy(()=>res.json({ok:true}));
 });
 
-router.get("/me", (req, res)=>{
+router.get("/me", async (req, res)=>{
   if(!req.session.userId) return res.json({ user:null });
-  const db = readDB();
+  const db = await readDB();
   const user = db.users.find(u=>u.id === req.session.userId);
   if(!user) return res.json({ user:null });
   res.json({ user: publicUser(user) });
 });
 
 /* ---- Changement du mot de passe provisoire (obligatoire à la 1ère connexion) ---- */
-router.post("/change-password", (req, res)=>{
+router.post("/change-password", async (req, res)=>{
   if(!req.session.userId) return res.status(401).json({error:"Non connecté"});
   const { newPassword } = req.body;
   if(!newPassword || newPassword.length < 6) return res.status(400).json({error:"Mot de passe trop court (6 caractères minimum)."});
-  const db = readDB();
+  const db = await readDB();
   const user = db.users.find(u=>u.id === req.session.userId);
   if(!user) return res.status(404).json({error:"Utilisateur introuvable"});
   user.passwordHash = hashPassword(newPassword);
   user.mustChangePassword = false;
-  writeDB(db);
+  await writeDB(db);
   res.json({ user: publicUser(user) });
 });
 
 /* ---- Compléter le profil élève : classe + nom + prénom (1ère connexion) ---- */
-router.post("/complete-profile", (req, res)=>{
+router.post("/complete-profile", async (req, res)=>{
   if(!req.session.userId) return res.status(401).json({error:"Non connecté"});
   const { classId, nom, prenom } = req.body;
   if(!classId || !nom || !prenom) return res.status(400).json({error:"Classe, nom et prénom requis."});
-  const db = readDB();
+  const db = await readDB();
   const user = db.users.find(u=>u.id === req.session.userId);
   if(!user) return res.status(404).json({error:"Utilisateur introuvable"});
   if(!db.classes.some(c=>c.id===classId)) return res.status(400).json({error:"Classe invalide."});
   user.classId = classId; user.nom = nom.trim(); user.prenom = prenom.trim();
-  writeDB(db);
+  await writeDB(db);
   res.json({ user: publicUser(user) });
 });
 

@@ -8,30 +8,31 @@ const { v4: uuid } = require("uuid");
 router.use(requireRole("admin"));
 
 /* ---- Classes ---- */
-router.get("/classes", (req, res)=>{
-  res.json({ classes: readDB().classes });
+router.get("/classes", async (req, res)=>{
+  const db = await readDB();
+  res.json({ classes: db.classes });
 });
 
-router.post("/classes", (req, res)=>{
+router.post("/classes", async (req, res)=>{
   const { name, option } = req.body;
   if(!name) return res.status(400).json({error:"Nom de classe requis."});
-  const db = readDB();
+  const db = await readDB();
   const cls = { id: uuid(), name: name.trim(), option: (option||"").trim() };
   db.classes.push(cls);
-  writeDB(db);
+  await writeDB(db);
   res.json({ class: cls });
 });
 
-router.delete("/classes/:id", (req, res)=>{
-  const db = readDB();
+router.delete("/classes/:id", async (req, res)=>{
+  const db = await readDB();
   db.classes = db.classes.filter(c=>c.id !== req.params.id);
-  writeDB(db);
+  await writeDB(db);
   res.json({ ok:true });
 });
 
 /* ---- Utilisateurs (création avec mot de passe provisoire) ---- */
-router.get("/users", (req, res)=>{
-  const db = readDB();
+router.get("/users", async (req, res)=>{
+  const db = await readDB();
   const users = db.users.map(u=>({
     id:u.id, email:u.email, nom:u.nom, prenom:u.prenom, role:u.role,
     classId:u.classId, mustChangePassword:u.mustChangePassword,
@@ -40,11 +41,11 @@ router.get("/users", (req, res)=>{
   res.json({ users });
 });
 
-router.post("/users", (req, res)=>{
+router.post("/users", async (req, res)=>{
   const { email, role, classId, nom, prenom, password } = req.body;
   if(!email || !role) return res.status(400).json({error:"E-mail et rôle requis."});
   if(!["eleve","prof"].includes(role)) return res.status(400).json({error:"Rôle invalide."});
-  const db = readDB();
+  const db = await readDB();
   const cleanEmail = email.toLowerCase().trim();
   if(db.users.some(u=>u.email === cleanEmail)) return res.status(400).json({error:"Cet e-mail existe déjà."});
 
@@ -58,27 +59,27 @@ router.post("/users", (req, res)=>{
     mustChangePassword: true
   };
   db.users.push(user);
-  writeDB(db);
+  await writeDB(db);
   res.json({ user: { id:user.id, email:user.email, role:user.role, tempPassword: tempPass } });
 });
 
-router.delete("/users/:id", (req, res)=>{
-  const db = readDB();
+router.delete("/users/:id", async (req, res)=>{
+  const db = await readDB();
   db.users = db.users.filter(u=>u.id !== req.params.id);
-  writeDB(db);
+  await writeDB(db);
   res.json({ ok:true });
 });
 
 /* ---- Réinitialiser le mot de passe d'un utilisateur ---- */
-router.post("/users/:id/reset-password", (req, res)=>{
-  const db = readDB();
+router.post("/users/:id/reset-password", async (req, res)=>{
+  const db = await readDB();
   const user = db.users.find(u=>u.id === req.params.id);
   if(!user) return res.status(404).json({error:"Utilisateur introuvable"});
   const tempPass = genTempPassword();
   user.passwordHash = hashPassword(tempPass);
   user.tempPasswordPlain = tempPass;
   user.mustChangePassword = true;
-  writeDB(db);
+  await writeDB(db);
   res.json({ tempPassword: tempPass });
 });
 

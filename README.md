@@ -26,29 +26,49 @@ la version précédente (localStorage).
 - **Suivi par classe** : un bouton par classe affiche un tableau des
   élèves avec leurs devoirs/TP non faits (en retard, non notés).
 
-## ⚠️ Point crucial — la persistance des données sur Render
+## ⚠️ Persistance des données : MongoDB Atlas (gratuit)
 
-Les données (comptes, classes, devoirs, notes) sont stockées dans un
-fichier `data/db.json` sur le serveur. **Sur le plan gratuit de Render,
-le système de fichiers est réinitialisé à chaque redéploiement ou
-redémarrage du service** — vous perdriez alors tous les comptes et
-toutes les notes.
+Render en plan gratuit ne propose pas de disque persistant : sans base de
+données externe, toutes les données seraient perdues à chaque redéploiement.
+Le site utilise donc **MongoDB Atlas**, une base de données hébergée
+gratuitement à vie (aucune carte bancaire requise sur le plan gratuit M0).
 
-**Pour éviter ça, deux solutions :**
+### Créer la base (5 minutes, une seule fois)
 
-1. **Ajouter un disque persistant Render** (payant, à partir de quelques
-   dollars/mois) : Render → votre service → **Disks** → *Add Disk*, monté
-   sur `/opt/render/project/src/data`. C'est la solution la plus simple
-   avec ce projet tel quel.
-2. **Migrer vers une vraie base de données** (ex. Render PostgreSQL,
-   qui a un plan gratuit) — plus robuste mais demande d'adapter le code
-   (`lib/db.js`). Dites-le-moi si vous voulez que je le fasse.
+1. Allez sur [mongodb.com/cloud/atlas/register](https://www.mongodb.com/cloud/atlas/register) et créez un compte gratuit.
+2. Créez un **cluster gratuit** (choisissez le plan **M0 Free**).
+3. Dans **Database Access** : créez un utilisateur de base de données
+   (nom d'utilisateur + mot de passe) — notez-les, ils vont dans l'URL de
+   connexion.
+4. Dans **Network Access** : ajoutez l'adresse IP `0.0.0.0/0` (autoriser
+   depuis n'importe où) — nécessaire car l'IP de Render change.
+5. Dans **Database** → votre cluster → **Connect** → **Drivers** :
+   copiez la chaîne de connexion, du type :
+   ```
+   mongodb+srv://UTILISATEUR:MOTDEPASSE@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   ```
+   Remplacez `UTILISATEUR` et `MOTDEPASSE` par ceux créés à l'étape 3.
 
-Tant que vous n'avez pas mis en place l'une des deux solutions, **ne
-redéployez pas sans avoir noté/sauvegardé le contenu de `data/db.json`**
-si vous avez des comptes/notes importants dedans.
+### Brancher la base sur Render
 
-## Déployer sur Render (Web Service, pas Static Site)
+1. Sur Render, ouvrez votre **Web Service** → **Environment**.
+2. Ajoutez une variable d'environnement :
+   - **Key** : `MONGODB_URI`
+   - **Value** : la chaîne de connexion copiée ci-dessus
+3. Ajoutez aussi (recommandé) :
+   - **Key** : `SESSION_SECRET`
+   - **Value** : une chaîne aléatoire longue, par exemple générée avec
+     `openssl rand -hex 32`
+4. Sauvegardez — Render redéploie automatiquement.
+
+C'est tout : à partir de là, comptes, classes, devoirs/TP et notes sont
+stockés sur MongoDB Atlas et **survivent** aux redéploiements, aux
+redémarrages et à la mise en veille du plan gratuit Render (les
+instances gratuites Render se mettent en veille après une période
+d'inactivité et redémarrent à la requête suivante — un peu plus lent au
+premier chargement, mais sans perte de données).
+
+## Déployer sur Render (Web Service — pas Static Site)
 
 1. Poussez ce dossier sur GitHub (voir plus bas).
 2. Sur [render.com](https://render.com) : **New +** → **Web Service**.
@@ -57,10 +77,9 @@ si vous avez des comptes/notes importants dedans.
    - **Build Command** : `npm install`
    - **Start Command** : `npm start`
    - **Environment** : Node
-5. (Recommandé) Ajoutez une variable d'environnement `SESSION_SECRET`
-   avec une valeur aléatoire longue (Render → Environment).
-6. (Recommandé) Ajoutez un disque persistant comme expliqué ci-dessus.
-7. Créez le service. Render vous donne une URL du type
+5. Configurez les variables d'environnement `MONGODB_URI` et
+   `SESSION_SECRET` comme expliqué ci-dessus (section MongoDB Atlas).
+6. Créez le service. Render vous donne une URL du type
    `https://electrotechnique-site.onrender.com`.
 
 ## Premier lancement
@@ -83,15 +102,17 @@ si vous avez des comptes/notes importants dedans.
 
 ```bash
 npm install
+export MONGODB_URI="votre_chaine_de_connexion_atlas"
 npm start
 ```
 Le site est alors sur `http://localhost:3000`.
+Sans `MONGODB_URI`, le serveur refuse de démarrer (message d'erreur explicite).
 
 ## Structure
 
 ```
 server.js              Point d'entrée Express
-lib/db.js              Stockage JSON (à remplacer par une vraie BDD si besoin)
+lib/db.js              Accès MongoDB Atlas (base de données partagée, persistante)
 lib/auth.js             Hachage des mots de passe, génération de mots de passe provisoires
 lib/grading.js           Calcul des moyennes (avec 0 automatique si en retard)
 middleware/auth.js       Vérification de connexion / rôle
@@ -100,6 +121,16 @@ routes/admin.js            Gestion des classes et des comptes
 routes/assignments.js        Devoirs / TP (avec upload de document)
 routes/grades.js              Notes, moyennes, tableau de suivi
 public/                        Pages HTML/CSS/JS servies au navigateur
-uploads/                        Documents joints aux devoirs/TP (créés à l'usage)
-data/db.json                     Base de données (créée automatiquement)
+uploads/                        Documents joints aux devoirs/TP (créés à l'usage — voir
+                                 note ci-dessous sur leur persistance)
 ```
+
+## À savoir : les documents joints (uploads)
+
+Les fichiers déposés par les profs (PDF de TP, etc.) sont eux enregistrés
+directement sur le disque du service Render, **pas** dans MongoDB — donc
+eux seront perdus en cas de redéploiement, contrairement au reste des
+données. Pour un usage ponctuel/scolaire ça reste généralement acceptable,
+mais dites-le-moi si vous voulez que je les stocke aussi de façon durable
+(ex. sur MongoDB en base64, ou sur un service de stockage de fichiers
+gratuit comme Cloudinary).

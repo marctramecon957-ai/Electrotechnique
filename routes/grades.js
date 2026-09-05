@@ -6,8 +6,8 @@ const { computeStudentAverage } = require("../lib/grading");
 const { v4: uuid } = require("uuid");
 
 /* ---- Notes d'un devoir/TP (prof) : liste des élèves concernés + notes existantes ---- */
-router.get("/assignment/:assignmentId", requireRole("prof","admin"), (req, res)=>{
-  const db = readDB();
+router.get("/assignment/:assignmentId", requireRole("prof","admin"), async (req, res)=>{
+  const db = await readDB();
   const assignment = db.assignments.find(a=>a.id === req.params.assignmentId);
   if(!assignment) return res.status(404).json({error:"Devoir/TP introuvable"});
   const students = db.users.filter(u=>u.role==="eleve" && assignment.classIds.includes(u.classId));
@@ -19,10 +19,10 @@ router.get("/assignment/:assignmentId", requireRole("prof","admin"), (req, res)=
 });
 
 /* ---- Enregistrer / mettre à jour une note ---- */
-router.post("/", requireRole("prof","admin"), (req, res)=>{
+router.post("/", requireRole("prof","admin"), async (req, res)=>{
   const { assignmentId, studentId, note } = req.body;
   if(!assignmentId || !studentId) return res.status(400).json({error:"Devoir et élève requis."});
-  const db = readDB();
+  const db = await readDB();
   const assignment = db.assignments.find(a=>a.id===assignmentId);
   if(!assignment) return res.status(404).json({error:"Devoir/TP introuvable"});
   let g = db.grades.find(gr=>gr.assignmentId===assignmentId && gr.studentId===studentId);
@@ -33,13 +33,13 @@ router.post("/", requireRole("prof","admin"), (req, res)=>{
     g = { id: uuid(), assignmentId, studentId, note: noteVal, gradedAt: Date.now() };
     db.grades.push(g);
   }
-  writeDB(db);
+  await writeDB(db);
   res.json({ grade: g });
 });
 
 /* ---- Mes notes (élève connecté) ---- */
-router.get("/me", requireAuth, (req, res)=>{
-  const db = readDB();
+router.get("/me", requireAuth, async (req, res)=>{
+  const db = await readDB();
   const user = db.users.find(u=>u.id===req.session.userId);
   if(user.role !== "eleve" || !user.classId) return res.json({ average:null, details:[] });
   const result = computeStudentAverage(user.id, user.classId, db.assignments, db.grades);
@@ -47,8 +47,8 @@ router.get("/me", requireAuth, (req, res)=>{
 });
 
 /* ---- Moyennes de toute une classe (prof/admin) ---- */
-router.get("/class/:classId", requireRole("prof","admin"), (req, res)=>{
-  const db = readDB();
+router.get("/class/:classId", requireRole("prof","admin"), async (req, res)=>{
+  const db = await readDB();
   const classId = req.params.classId;
   const students = db.users.filter(u=>u.role==="eleve" && u.classId===classId);
   const results = students.map(s=>{
@@ -61,8 +61,8 @@ router.get("/class/:classId", requireRole("prof","admin"), (req, res)=>{
 });
 
 /* ---- Tableau de suivi : devoirs/TP non faits par classe ---- */
-router.get("/suivi/:classId", requireRole("prof","admin"), (req, res)=>{
-  const db = readDB();
+router.get("/suivi/:classId", requireRole("prof","admin"), async (req, res)=>{
+  const db = await readDB();
   const classId = req.params.classId;
   const students = db.users.filter(u=>u.role==="eleve" && u.classId===classId);
   const assignments = db.assignments.filter(a=>a.classIds.includes(classId));

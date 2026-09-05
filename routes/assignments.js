@@ -16,15 +16,15 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 } // 20 Mo
 });
 
-function currentUser(req){
-  const db = readDB();
+async function currentUser(req){
+  const db = await readDB();
   return db.users.find(u=>u.id === req.session.userId);
 }
 
 /* ---- Liste des devoirs/TP visibles par l'utilisateur connecté ---- */
-router.get("/", requireAuth, (req, res)=>{
-  const db = readDB();
-  const user = currentUser(req);
+router.get("/", requireAuth, async (req, res)=>{
+  const db = await readDB();
+  const user = await currentUser(req);
   let list = db.assignments;
   if(user.role === "eleve"){
     list = list.filter(a=>a.classIds.includes(user.classId));
@@ -38,13 +38,13 @@ router.get("/", requireAuth, (req, res)=>{
 });
 
 /* ---- Créer un devoir / TP (prof uniquement) ---- */
-router.post("/", requireRole("prof","admin"), upload.single("document"), (req, res)=>{
+router.post("/", requireRole("prof","admin"), upload.single("document"), async (req, res)=>{
   const { title, description, type, classIds, dueDate, coefficient, maxNote } = req.body;
   if(!title || !type || !classIds){
     return res.status(400).json({error:"Titre, type et au moins une classe sont requis."});
   }
   const ids = Array.isArray(classIds) ? classIds : [classIds];
-  const db = readDB();
+  const db = await readDB();
   const assignment = {
     id: uuid(),
     title: title.trim(),
@@ -60,15 +60,15 @@ router.post("/", requireRole("prof","admin"), upload.single("document"), (req, r
     createdAt: Date.now()
   };
   db.assignments.push(assignment);
-  writeDB(db);
+  await writeDB(db);
   res.json({ assignment });
 });
 
-router.delete("/:id", requireRole("prof","admin"), (req, res)=>{
-  const db = readDB();
+router.delete("/:id", requireRole("prof","admin"), async (req, res)=>{
+  const db = await readDB();
   db.assignments = db.assignments.filter(a=>a.id !== req.params.id);
   db.grades = db.grades.filter(g=>g.assignmentId !== req.params.id);
-  writeDB(db);
+  await writeDB(db);
   res.json({ ok:true });
 });
 

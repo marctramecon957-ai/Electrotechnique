@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const assignmentRoutes = require("./routes/assignments");
 const gradeRoutes = require("./routes/grades");
+const { readDB, connect } = require("./lib/db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,10 +28,9 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/grades", gradeRoutes);
 
 // Liste des classes, accessible à tout utilisateur connecté (choix de classe à la 1ère connexion)
-app.get("/api/classes-publiques", (req, res)=>{
+app.get("/api/classes-publiques", async (req, res)=>{
   if(!req.session.userId) return res.status(401).json({error:"Non connecté"});
-  const { readDB } = require("./lib/db");
-  const db = readDB();
+  const db = await readDB();
   res.json({ classes: db.classes.map(c=>({id:c.id, name:c.name, option:c.option})) });
 });
 
@@ -39,6 +39,13 @@ app.get(/^(?!\/api).*/, (req, res)=>{
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.listen(PORT, ()=>{
-  console.log("Serveur démarré sur le port " + PORT);
-});
+connect()
+  .then(()=>{
+    app.listen(PORT, ()=>{
+      console.log("Serveur démarré sur le port " + PORT);
+    });
+  })
+  .catch(err=>{
+    console.error("Impossible de se connecter à MongoDB :", err.message);
+    process.exit(1);
+  });
