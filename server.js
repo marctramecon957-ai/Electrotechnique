@@ -29,7 +29,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 /* ---- Mode maintenance : bloque tout le monde sauf l'administrateur ---- */
 const MAINTENANCE_ALLOWED_PREFIXES = [
   "/api/auth", "/api/maintenance/status", "/api/classes-publiques",
-  "/css/", "/js/", "/img/",
+  "/css/", "/js/", "/img/", "/icons/",
+  "/manifest.json", "/service-worker.js",
   "/connexion.html", "/changer-mot-de-passe.html", "/complement-profil.html",
   "/maintenance.html", "/favicon.ico"
 ];

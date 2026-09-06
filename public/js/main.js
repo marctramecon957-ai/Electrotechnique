@@ -105,9 +105,40 @@ function getDB(key){ return JSON.parse(localStorage.getItem(key) || "[]"); }
 function setDB(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
+/* ---------- PWA : enregistrement du service worker + invite d'installation ---------- */
+function initPWA(){
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("/service-worker.js").catch(()=>{});
+  }
+
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = document.getElementById("install-app-btn");
+    if(btn) btn.classList.remove("hidden");
+  });
+
+  document.addEventListener("click", async (e)=>{
+    if(e.target && e.target.id === "install-app-btn" && deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      const btn = document.getElementById("install-app-btn");
+      if(btn) btn.classList.add("hidden");
+    }
+  });
+
+  window.addEventListener("appinstalled", ()=>{
+    const btn = document.getElementById("install-app-btn");
+    if(btn) btn.classList.add("hidden");
+  });
+}
+
 document.addEventListener("DOMContentLoaded", ()=>{
   initDefaults();
   initTheme();
   markActiveNav();
   initMobileNav();
+  initPWA();
 });
