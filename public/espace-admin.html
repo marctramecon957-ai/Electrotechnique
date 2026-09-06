@@ -46,6 +46,7 @@
       <button class="admin-tab-btn" data-tab="publications">Publications</button>
       <button class="admin-tab-btn" data-tab="sondages">Sondages</button>
       <button class="admin-tab-btn" data-tab="documents">Documents</button>
+      <button class="admin-tab-btn" data-tab="maintenance">Maintenance</button>
     </div>
 
     <!-- Classes -->
@@ -252,6 +253,43 @@
       <div id="doc-list"></div>
     </div>
 
+    <!-- Maintenance -->
+    <div class="admin-panel" id="panel-maintenance">
+      <div class="card" style="margin-bottom:24px;">
+        <h3>Statut actuel</h3>
+        <p id="mnt-current-status" style="font-family:var(--f-mono);font-size:.9rem;">—</p>
+      </div>
+
+      <div class="card" style="margin-bottom:24px;">
+        <h3>Fermer le site maintenant</h3>
+        <p style="color:var(--text-soft);font-size:.88rem;">Tout le monde (élèves, profs, visiteurs) verra une page de maintenance. Vous restez le seul à accéder au site en tant qu'administrateur.</p>
+        <label style="font-size:.82rem;font-weight:700;">Message affiché aux visiteurs (optionnel)</label>
+        <textarea id="mnt-now-message" style="width:100%;min-height:70px;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);" placeholder="Ex. Maintenance en cours, merci de revenir plus tard."></textarea>
+        <label style="font-size:.82rem;font-weight:700;display:block;margin-top:10px;">Durée (minutes, optionnel — laisser vide pour une fermeture manuelle sans fin programmée)</label>
+        <input id="mnt-now-duration" type="number" min="1" placeholder="Ex. 60" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+        <button class="btn btn-rouge" id="mnt-activate-now-btn" style="margin-top:14px;">Fermer le site maintenant</button>
+      </div>
+
+      <div class="card" style="margin-bottom:24px;">
+        <h3>Programmer une fermeture</h3>
+        <div class="field-row">
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Date et heure de début</label>
+            <input id="mnt-sched-start" type="datetime-local" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+          <div>
+            <label style="font-size:.82rem;font-weight:700;">Durée (minutes)</label>
+            <input id="mnt-sched-duration" type="number" min="1" placeholder="Ex. 120" style="width:100%;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);">
+          </div>
+        </div>
+        <label style="font-size:.82rem;font-weight:700;display:block;margin-top:10px;">Message affiché aux visiteurs (optionnel)</label>
+        <textarea id="mnt-sched-message" style="width:100%;min-height:70px;padding:9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);"></textarea>
+        <button class="btn btn-jaune" id="mnt-schedule-btn" style="margin-top:14px;">Programmer</button>
+      </div>
+
+      <button class="btn btn-ghost" id="mnt-deactivate-btn">Annuler / rouvrir le site immédiatement</button>
+    </div>
+
   </div>
 </section>
 
@@ -272,6 +310,7 @@
   initPublications();
   initSondages();
   initDocuments();
+  initMaintenance();
 })();
 
 document.getElementById("logout-btn").addEventListener("click", async ()=>{
@@ -495,6 +534,56 @@ async function renderDocsAdminList(){
       toast("Document supprimé");
       renderDocsAdminList();
     });
+  });
+}
+
+/* ---- Maintenance ---- */
+function fmtDateTime(ts){
+  if(!ts) return null;
+  return new Date(ts).toLocaleString('fr-FR', {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+async function renderMaintenanceStatus(){
+  const { status } = await apiGet("/maintenance");
+  const el = document.getElementById("mnt-current-status");
+  if(!status.isActive){
+    el.textContent = "Site ouvert normalement.";
+    el.style.color = "";
+  } else {
+    let txt = status.mode === "programme" ? "Fermeture programmée en cours" : "Site fermé (maintenance manuelle)";
+    if(status.endsAt) txt += " — réouverture prévue le " + fmtDateTime(status.endsAt);
+    el.textContent = txt;
+    el.style.color = "var(--rouge)";
+  }
+}
+function initMaintenance(){
+  renderMaintenanceStatus();
+
+  document.getElementById("mnt-activate-now-btn").addEventListener("click", async ()=>{
+    const message = document.getElementById("mnt-now-message").value.trim();
+    const durationMinutes = document.getElementById("mnt-now-duration").value || null;
+    try{
+      await apiPost("/maintenance/activate-now", { message, durationMinutes });
+      toast("Site fermé");
+      renderMaintenanceStatus();
+    }catch(e){ toast(e.message); }
+  });
+
+  document.getElementById("mnt-schedule-btn").addEventListener("click", async ()=>{
+    const startAt = document.getElementById("mnt-sched-start").value;
+    const durationMinutes = document.getElementById("mnt-sched-duration").value;
+    const message = document.getElementById("mnt-sched-message").value.trim();
+    if(!startAt || !durationMinutes){ toast("Date de début et durée requises"); return; }
+    try{
+      await apiPost("/maintenance/schedule", { startAt, durationMinutes, message });
+      toast("Fermeture programmée");
+      renderMaintenanceStatus();
+    }catch(e){ toast(e.message); }
+  });
+
+  document.getElementById("mnt-deactivate-btn").addEventListener("click", async ()=>{
+    await apiPost("/maintenance/deactivate");
+    toast("Site rouvert");
+    renderMaintenanceStatus();
   });
 }
 </script>

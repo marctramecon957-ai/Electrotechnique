@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site en maintenance — Électrotechnique</title>
+<link rel="icon" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="top-rule"></div>
+<section class="admin-shell">
+  <div class="container">
+    <div class="login-box" style="text-align:center;">
+      <img src="img/logo.png" alt="Logo" style="height:48px;margin:0 auto 20px;">
+      <h2>Site en maintenance</h2>
+      <p id="mnt-message" style="color:var(--text-soft);font-size:.94rem;">Le site est temporairement indisponible. Merci de revenir un peu plus tard.</p>
+      <p id="mnt-ends" class="ref-label" style="margin-top:16px;"></p>
+      <button class="btn btn-ghost btn-sm" style="margin-top:20px;" onclick="location.reload()">Réessayer</button>
+    </div>
+  </div>
+</section>
+<script>
+async function loadStatus(){
+  try{
+    const r = await fetch("/api/maintenance/status");
+    const s = await r.json();
+    if(!s.isActive){ location.href = "index.html"; return; }
+    if(s.message) document.getElementById("mnt-message").textContent = s.message;
+    if(s.endsAt){
+      const d = new Date(s.endsAt);
+      document.getElementById("mnt-ends").textContent = "Retour prévu vers " + d.toLocaleString('fr-FR', {day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+    }
+  }catch(e){}
+}
+loadStatus();
+setInterval(loadStatus, 30000);
+</script>
+</body>
+</html>

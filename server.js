@@ -8,7 +8,9 @@ const adminRoutes = require("./routes/admin");
 const assignmentRoutes = require("./routes/assignments");
 const gradeRoutes = require("./routes/grades");
 const contentRoutes = require("./routes/content");
+const maintenanceRoutes = require("./routes/maintenance");
 const { readDB, connect } = require("./lib/db");
+const { getMaintenanceStatus } = require("./lib/maintenance");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +25,32 @@ app.use(session({
 }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+/* ---- Mode maintenance : bloque tout le monde sauf l'administrateur ---- */
+const MAINTENANCE_ALLOWED_PREFIXES = [
+  "/api/auth", "/api/maintenance/status", "/api/classes-publiques",
+  "/css/", "/js/", "/img/",
+  "/connexion.html", "/changer-mot-de-passe.html", "/complement-profil.html",
+  "/maintenance.html", "/favicon.ico"
+];
+app.use(async (req, res, next)=>{
+  try{
+    if(req.session && req.session.role === "admin") return next();
+    if(MAINTENANCE_ALLOWED_PREFIXES.some(p=>req.path.startsWith(p))) return next();
+
+    const db = await readDB();
+    const status = getMaintenanceStatus(db.maintenance);
+    if(!status.isActive) return next();
+
+    if(req.path.startsWith("/api/")){
+      return res.status(503).json({ error:"Site en maintenance", maintenance:true, message: status.message, endsAt: status.endsAt });
+    }
+    return res.sendFile(path.join(__dirname, "public", "maintenance.html"));
+  }catch(e){
+    next(); // en cas de souci, on n'empêche pas l'accès au site
+  }
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/auth", authRoutes);
@@ -30,6 +58,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/grades", gradeRoutes);
 app.use("/api/content", contentRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 
 // Liste des classes, accessible à tout utilisateur connecté (choix de classe à la 1ère connexion)
 app.get("/api/classes-publiques", async (req, res)=>{
