@@ -31,6 +31,13 @@ la version précédente (localStorage).
   qui les gardait uniquement dans le navigateur). Le vote aux sondages
   est ouvert à tout visiteur (sans compte), avec un anti-double-vote par
   cookie anonyme.
+- **Notifications** : quand un professeur saisit une note, vous recevez
+  une vraie notification push (sur ordinateur ou sur le téléphone, même
+  appli fermée) — cliquez sur la cloche 🔔 dans l'espace admin pour
+  activer les alertes une première fois (autorisation à accepter dans le
+  navigateur). Un historique reste aussi consultable dans la cloche même
+  sans avoir activé les alertes. Aucune configuration supplémentaire à
+  faire : les clés techniques nécessaires sont générées automatiquement.
 
 ## ⚠️ Persistance des données : MongoDB Atlas (gratuit)
 

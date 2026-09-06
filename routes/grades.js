@@ -3,6 +3,7 @@ const router = express.Router();
 const { readDB, writeDB } = require("../lib/db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { computeStudentAverage } = require("../lib/grading");
+const { createAdminNotification } = require("../lib/push");
 const { v4: uuid } = require("uuid");
 
 /* ---- Notes d'un devoir/TP (prof) : liste des élèves concernés + notes existantes ---- */
@@ -35,6 +36,19 @@ router.post("/", requireRole("prof","admin"), async (req, res)=>{
   }
   await writeDB(db);
   res.json({ grade: g });
+
+  // Notifie l'administrateur uniquement quand un professeur saisit une vraie note
+  if(noteVal !== null && req.session.role === "prof"){
+    const prof = db.users.find(u=>u.id === req.session.userId);
+    const student = db.users.find(u=>u.id === studentId);
+    const profName = prof ? `${prof.prenom} ${prof.nom}` : "Un professeur";
+    const studentName = student ? `${student.prenom} ${student.nom}` : "un élève";
+    createAdminNotification(
+      "Nouvelle note",
+      `${profName} a noté ${studentName} : ${noteVal}/${assignment.maxNote} pour « ${assignment.title} »`,
+      "/espace-admin.html"
+    ).catch(()=>{});
+  }
 });
 
 /* ---- Mes notes (élève connecté) ---- */

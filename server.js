@@ -9,6 +9,7 @@ const assignmentRoutes = require("./routes/assignments");
 const gradeRoutes = require("./routes/grades");
 const contentRoutes = require("./routes/content");
 const maintenanceRoutes = require("./routes/maintenance");
+const notificationRoutes = require("./routes/notifications");
 const { readDB, writeDB, connect } = require("./lib/db");
 const { getMaintenanceStatus } = require("./lib/maintenance");
 
@@ -64,6 +65,7 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/grades", gradeRoutes);
 app.use("/api/content", contentRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Liste des classes, accessible à tout utilisateur connecté (choix de classe à la 1ère connexion)
 app.get("/api/classes-publiques", async (req, res)=>{
