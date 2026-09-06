@@ -9,7 +9,7 @@ const assignmentRoutes = require("./routes/assignments");
 const gradeRoutes = require("./routes/grades");
 const contentRoutes = require("./routes/content");
 const maintenanceRoutes = require("./routes/maintenance");
-const { readDB, connect } = require("./lib/db");
+const { readDB, writeDB, connect } = require("./lib/db");
 const { getMaintenanceStatus } = require("./lib/maintenance");
 
 const app = express();
@@ -41,6 +41,10 @@ app.use(async (req, res, next)=>{
 
     const db = await readDB();
     const status = getMaintenanceStatus(db.maintenance);
+    if(status.expired){
+      db.maintenance = { active:false, scheduledStart:null, scheduledEnd:null, message:"" };
+      await writeDB(db);
+    }
     if(!status.isActive) return next();
 
     if(req.path.startsWith("/api/")){

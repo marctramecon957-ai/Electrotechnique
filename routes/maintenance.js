@@ -7,13 +7,23 @@ const { getMaintenanceStatus } = require("../lib/maintenance");
 /* ---- Statut public (utilisé par la page maintenance elle-même) ---- */
 router.get("/status", async (req, res)=>{
   const db = await readDB();
-  res.json(getMaintenanceStatus(db.maintenance));
+  const status = getMaintenanceStatus(db.maintenance);
+  if(status.expired){
+    db.maintenance = { active:false, scheduledStart:null, scheduledEnd:null, message:"" };
+    await writeDB(db);
+  }
+  res.json(status);
 });
 
 /* ---- Configuration complète (admin) ---- */
 router.get("/", requireRole("admin"), async (req, res)=>{
   const db = await readDB();
-  res.json({ maintenance: db.maintenance, status: getMaintenanceStatus(db.maintenance) });
+  const status = getMaintenanceStatus(db.maintenance);
+  if(status.expired){
+    db.maintenance = { active:false, scheduledStart:null, scheduledEnd:null, message:"" };
+    await writeDB(db);
+  }
+  res.json({ maintenance: db.maintenance, status });
 });
 
 /* ---- Activer immédiatement ---- */
